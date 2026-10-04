@@ -1,0 +1,53 @@
+name: Release pack
+
+on:
+  push:
+    tags:
+      - 'pack-v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Pack version, for example 1.0.0'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve version
+        id: v
+        run: |
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            echo "version=${{ github.event.inputs.version }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=${GITHUB_REF_NAME#pack-v}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build zip
+        run: |
+          shopt -s nullglob
+          dlls=(plugins/*.dll)
+          if [ ${#dlls[@]} -eq 0 ]; then
+            echo "No DLLs in plugins/ - nothing to release." >&2
+            exit 1
+          fi
+          stage=stage/IFZ-Compilation
+          mkdir -p "$stage/BepInEx/plugins/IFZ-Compilation"
+          cp "${dlls[@]}" "$stage/BepInEx/plugins/IFZ-Compilation/"
+          cp docs/INSTALL.md docs/HOTKEYS.md "$stage/"
+          (cd stage/IFZ-Compilation && zip -r "../../IFZ-Compilation-pack-v${{ steps.v.outputs.version }}.zip" .)
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: pack-v${{ steps.v.outputs.version }}
+          name: IFZ Compilation pack v${{ steps.v.outputs.version }}
+          body: See FEATURES_AND_VERSIONS.md for the changes in this pack. Install guide - docs/INSTALL.md.
+          files: |
+            IFZ-Compilation-pack-v${{ steps.v.outputs.version }}.zip
+            plugins/*.dll

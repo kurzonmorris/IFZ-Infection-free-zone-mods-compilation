@@ -1,0 +1,14 @@
+<Project>
+  <PropertyGroup>
+    <IFZGameDir Condition="'$(IFZGameDir)' == '' And '$(OS)' == 'Windows_NT'">C:\Program Files (x86)\Steam\steamapps\common\Infection Free Zone</IFZGameDir>
+    <IFZGameDir Condition="'$(IFZGameDir)' == ''">$(HOME)/.steam/steam/steamapps/common/Infection Free Zone</IFZGameDir>
+    <IFZManaged>$(IFZGameDir)/Infection Free Zone_Data/Managed</IFZManaged>
+    <IFZPluginDir>$(IFZGameDir)/BepInEx/plugins/IFZ-Compilation</IFZPluginDir>
+    <IFZRepoPlugins>$(MSBuildThisFileDirectory)../plugins</IFZRepoPlugins>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <NoWarn>$(NoWarn);MSB3277</NoWarn>
+  </PropertyGroup>
+</Project>
