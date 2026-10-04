@@ -1,6 +1,6 @@
 # Infection Free Zone — Modding Reference
 
-> **File version:** 1.1.0 · **Last edit:** 2026-10-04 10:26 UTC
+> **File version:** 1.2.0 · **Last edit:** 2026-10-04 22:32 UTC
 >
 > **Purpose:** Read this file before you work on any mod in this repository. It
 > holds every fact we found about the game, the tools, and our own project
@@ -32,6 +32,7 @@
 | 14 | `[#sources]` | The researched repositories and what each gives |
 | 15 | `[#research]` | The `research/` folder |
 | 16 | `[#open]` | Open questions and facts not yet verified |
+| — | — | **Look-up lists** (enums, resource ids, laws, configs, signals, controllers, console commands, input actions): `Explained-game_engineMap.md` |
 
 Legend used below: ✅ confirmed works · ❌ does not work · ⚠️ works with a
 caveat · 🧭 fact or how-to · ❓ not verified by us. A fact with a source tag
@@ -215,7 +216,10 @@ in-game ourselves unless the line says so.
 - **Build in the cloud session (how productionPlanner was built):**
   1. `apt-get install -y dotnet-sdk-8.0` (the dot.net install script is blocked
      by the proxy; NuGet.org works).
-  2. Unzip `research/Managed.zip` to a scratch folder.
+  2. Get the game's `Managed` folder and unzip it to a scratch folder. It was
+     `research/Managed.zip` until Kurzon removed it (2026-10-04). If it is not
+     in the repository, ask Kurzon where the game DLLs are now. **Without them
+     no mod can be built.**
   3. Make a fake game folder: `<scratch>/gamedir/BepInEx/core/` with
      `BepInEx.dll` and `0Harmony.dll` (BepInEx 5.4.23.2, for example from a
      clone of JaySNL/IFZMods `manual-install/BepInEx/core/`), and
@@ -728,9 +732,10 @@ Researched on 2026-10-04. Clone again for full detail.
 ## 15. The research folder  [#research]
 
 - `research/` holds third-party mods for study. Kurzon uploads them.
-- `research/Managed.zip` holds the game's `Managed` folder (incl. `Ifz.dll`).
-  Use it to build and decompile. ⚠️ It is game property in a public repository;
-  Kurzon decides whether it stays.
+- `research/Managed.zip` held the game's `Managed` folder (incl. `Ifz.dll`).
+  Kurzon removes it from the public repository on 2026-10-04 (game property).
+  Everything useful from it is in `Explained-game_engineMap.md` and §9.
+  A new build still needs the DLLs (see §5).
 - Decompiled research mods worth reading: `ProductionDashboard.dll` (selected
   building via `InfoPanelController`), `IFZBuildingManager.dll` (save ids,
   worker limits, F5 key), `ExpandedCitizensPanel.dll`.
@@ -745,7 +750,8 @@ Researched on 2026-10-04. Clone again for full detail.
 
 ## 16. Open questions  [#open]
 
-- ❓ Vanilla camera keys and any new hotkeys in the current full game.
+- ❓ Default keys of the Rewired actions (engine map §2). They are in a game
+  asset, not in code. Check the in-game Controls menu.
 - ❓ Exact `Player.log` path under Proton on the Steam Deck.
 - ❓ Whether ConfigurationManager's F1 conflict hurts play (both actions fire).
 - ❓ Whether to build our own shared library (`IFZ-core`) or depend on

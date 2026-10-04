@@ -1,6 +1,6 @@
 # Features and versions
 
-> **File version:** 1.1.0 · **Last edit:** 2026-10-04 10:26 UTC
+> **File version:** 1.2.0 · **Last edit:** 2026-10-04 22:32 UTC
 
 Every edit, feature, and change to any file in this repository. Newest first.
 Rules: see `Explained-game_infectionFreeZone.md` §1.2 and §1.3.
@@ -10,8 +10,9 @@ Rules: see `Explained-game_infectionFreeZone.md` §1.2 and §1.3.
 | File | Version |
 |------|---------|
 | README.md | 1.1.0 |
-| FEATURES_AND_VERSIONS.md | 1.1.0 |
-| Explained-game_infectionFreeZone.md | 1.1.0 |
+| FEATURES_AND_VERSIONS.md | 1.2.0 |
+| Explained-game_infectionFreeZone.md | 1.2.0 |
+| Explained-game_engineMap.md | 1.0.0 |
 | docs/INSTALL.md | 1.0.0 |
 | docs/HOTKEYS.md | 1.1.0 |
 | mods/_template (Plugin.cs, template.csproj, README.md) | 1.0.0 (template mod 0.1.0) |
@@ -28,6 +29,9 @@ Rules: see `Explained-game_infectionFreeZone.md` §1.2 and §1.3.
 
 | Date and time (UTC) | File | Version | Change |
 |---------------------|------|---------|--------|
+| 2026-10-04 22:32 | Explained-game_engineMap.md | 1.0.0 | New. Look-up lists from the decompiled game: assemblies, Rewired input actions, enums, difficulty settings, configs, signals, controllers, 178 console commands, namespaces. |
+| 2026-10-04 22:32 | Explained-game_infectionFreeZone.md | 1.2.0 | Linked the engine map; recorded removal of Managed.zip and that builds still need the game DLLs; updated open questions. |
+| 2026-10-04 22:32 | FEATURES_AND_VERSIONS.md | 1.2.0 | Recorded the changes above. |
 | 2026-10-04 10:26 | mods/productionPlanner, plugins/IFZ-productionPlanner-v0.1.0.dll | 0.1.0 | New mod. F6 planner window for the selected building: daily goal, workers needed, Advice/Auto, factor tick boxes, slot and daily-cap warnings, inputs, produced today. |
 | 2026-10-04 10:26 | mods/productionPlanner/README.md | 1.0.0 | New. Mod notes and formula. |
 | 2026-10-04 10:26 | Explained-game_infectionFreeZone.md | 1.1.0 | Added production, food, selection facts (§9.5a–c), cloud build steps (§5), research notes (§15), F6 in hotkey registry. |
