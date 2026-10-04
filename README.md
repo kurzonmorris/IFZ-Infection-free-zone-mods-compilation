@@ -1,6 +1,6 @@
 # IFZ Compilation — Infection Free Zone mods
 
-> **File version:** 1.0.0 · **Last edit:** 2026-10-04 01:00 UTC
+> **File version:** 1.1.0 · **Last edit:** 2026-10-04 10:26 UTC
 
 A set of BepInEx mods for **Infection Free Zone** that are built to work together.
 Each mod is a separate DLL, so you install only what you want.
@@ -46,7 +46,7 @@ See the [install guide](docs/INSTALL.md).
 
 | Mod | Version | Type | Summary |
 |-----|---------|------|---------|
-| _No mods released yet._ | | | |
+| [Production Planner](#productionplanner--v010) | 0.1.0 | Function | Set a daily output goal for a building and get the number of workers it needs. |
 
 <!--
 Copy this block for each mod. Keep the heading = the mod name.
@@ -64,6 +64,57 @@ Short one-line description.
 
 </details>
 -->
+
+### productionPlanner — v0.1.0
+
+Set a daily production goal on a building. The mod works out how many workers the building needs and tells you, or sets the max workers for you.
+File: [`IFZ-productionPlanner-v0.1.0.dll`](plugins/IFZ-productionPlanner-v0.1.0.dll) · Hotkey: **F6** · Status: first test build.
+
+<details>
+<summary><b>Planner window</b> — a floating box that follows the building you select</summary>
+
+- Press **F6** to open or close it. Drag it by its title.
+- It shows the building whose info panel is open. Select another building and the box changes.
+- Works for every building with a production (cookhouse, workshops, factories and similar).
+
+</details>
+
+<details>
+<summary><b>Daily goal</b> — type a number, use the buttons, or use the colony's food need</summary>
+
+- Type a goal per day, or use −50 / −10 / +10 / +50.
+- Ration buildings get a button: **Use colony food need**. It adds up what every worker, soldier and child eats per day, with the rations law.
+- The goal is saved per building and per save game.
+
+</details>
+
+<details>
+<summary><b>Advice or Auto</b> — choose per building</summary>
+
+- **Advice:** shows the worker number and a button to set it once.
+- **Auto:** sets the building's max workers every few seconds, so the goal holds when mood or weather change.
+
+</details>
+
+<details>
+<summary><b>Factors</b> — tick boxes for what the calculation includes</summary>
+
+- **Work hours:** the real working day (sunrise, sunset, work laws). Off = 24 hours.
+- **Mood:** the efficiency of the building's current workers.
+- **Weather:** the building's current temperature efficiency.
+- **Hauling allowance:** time workers spend carrying goods (default 20 %, change with − / +).
+
+</details>
+
+<details>
+<summary><b>Limits and inputs</b> — tells you when the building cannot reach the goal</summary>
+
+- Warns when the building has too few worker slots and gives the volume (m³) it would need.
+- Warns when the goal is above the building's daily production cap.
+- Lists each input per day (for example meat or vegetables) with stock and days left.
+- Shows what the building produced today, so you can compare it with the plan.
+
+</details>
 
 ---
 
