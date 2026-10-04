@@ -1,6 +1,6 @@
 # research
 
-> **File version:** 1.0.0 · **Last edit:** 2026-10-04 01:00 UTC
+> **File version:** 1.1.0 · **Last edit:** 2026-10-04 10:26 UTC
 
 Third-party mods kept for study only. They are a foundation for our own mods.
 
@@ -13,4 +13,5 @@ Third-party mods kept for study only. They are a foundation for our own mods.
 
 | Folder | Author | Source | Licence | Notes |
 |--------|--------|--------|---------|-------|
-| _empty — waiting for upload_ | | | | |
+| (root) | various | Uploaded by Kurzon 2026-10-04 | check per mod | About 50 mod DLLs (JaySNL and others) |
+| `Managed.zip` | Jutsu Games | Game install | Game property | The game's Managed folder. Used to build and decompile. |

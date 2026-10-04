@@ -1,6 +1,6 @@
 # Infection Free Zone — Modding Reference
 
-> **File version:** 1.0.0 · **Last edit:** 2026-10-04 01:00 UTC
+> **File version:** 1.1.0 · **Last edit:** 2026-10-04 10:26 UTC
 >
 > **Purpose:** Read this file before you work on any mod in this repository. It
 > holds every fact we found about the game, the tools, and our own project
@@ -212,6 +212,21 @@ in-game ourselves unless the line says so.
 
 - Target framework: `netstandard2.1` (JaySNL) or `net472` (MiKanSei39). Both
   work. **We use `netstandard2.1`.**
+- **Build in the cloud session (how productionPlanner was built):**
+  1. `apt-get install -y dotnet-sdk-8.0` (the dot.net install script is blocked
+     by the proxy; NuGet.org works).
+  2. Unzip `research/Managed.zip` to a scratch folder.
+  3. Make a fake game folder: `<scratch>/gamedir/BepInEx/core/` with
+     `BepInEx.dll` and `0Harmony.dll` (BepInEx 5.4.23.2, for example from a
+     clone of JaySNL/IFZMods `manual-install/BepInEx/core/`), and
+     `<scratch>/gamedir/Infection Free Zone_Data/Managed` → link to the unzipped
+     `Managed`.
+  4. `dotnet build mods/<mod>/<mod>.csproj -c Release -p:IFZGameDir=<scratch>/gamedir`.
+     The DLL lands in `plugins/`. Delete `bin/` and `obj/` after.
+- Decompile: `dotnet tool install -g ilspycmd --version 8.2.0.7535`, then
+  `DOTNET_ROLL_FORWARD=Major ilspycmd -p -o <out> Ifz.dll -r <Managed>`.
+- Extra references often needed: `Laungage.dll` (`MonoBehaviourSingleton`),
+  `JutsuGamesConfig.dll` (`Config` base class), `Zenject.dll`.
 - References (all with `<Private>false</Private>`, from the local game):
   - `BepInEx/core/BepInEx.dll`, `BepInEx/core/0Harmony.dll`
   - `Infection Free Zone_Data/Managed/Ifz.dll`
@@ -319,7 +334,7 @@ Add a row before you write the code. `docs/HOTKEYS.md` mirrors this table.
 | Key | Mod | Action | Since version |
 |-----|-----|--------|---------------|
 | F10 (recommended) | ConfigurationManager | Open mod settings | — |
-| _(none yet)_ | | | |
+| F6 | productionPlanner | Open / close the planner window | 0.1.0 |
 
 ---
 
@@ -482,6 +497,61 @@ Names are from `Ifz.dll`. Source tag in brackets. ❓ = not checked by us.
 - Walls and gates: `WallConstructor.CreateWall(...)`, `GatesController.CreateGate(...)`.
 - HQ: `HqController.MainHeadquarter`.
 
+### 9.5a Production mechanics (verified in decompiled `Ifz.dll`, 2026-10-04)
+
+- `ProductionWork` (`Gameplay.Production`) is the work of a production
+  building. Get it from `structure.CurrentWork as ProductionWork`.
+- **Speed is linear in workers.** Each producing worker adds
+  `worker.WorkModule.DeltaTimeExecute × GetCurrentTemperatureEfficiency()` to
+  the shared `CurrentProductionTime`. A cycle ends when it reaches
+  `ProductionData.GetProductionTime()` (GTS). Then the building gets the
+  `GetProfitPairs()` amounts. Workers that carry inputs or outputs
+  ("logistics workers") do not add production time.
+- `DeltaTimeExecute += timeSinceLastTick × 1 / (2 − Character.WorkerEfficiencyModifier)`
+  (`WorkModule.ExecuteWork`). Mood modifier 1 → 100 %, 0.5 → 67 %.
+- Work only happens in work hours: `Work.IsWorkHour()` = between
+  `SunriseHour + WorkersConfig.WorkStartHourAfterSunrise + LawsController.GetWorkStartingHourModifier()`
+  and `SunsetHour − WorkersConfig.WorkEndHourBeforeSunset + LawsController.GetWorkEndingHourModifier()`.
+- Time: `TimeController.HourLengthInGts = DayLengthInSeconds / 24`. Convert
+  with `ConvertGthToGts` / `ConvertGtsToGth`.
+- **Slots by volume:** `ProductionsData.GetMaxWorkers(structure)` =
+  `floor(Draft.MaxWorkers × Volume × 0.01 × PartialValue)`, min 1.
+  `WorkBase.InitialMaxWorkers` = this cap. `WorkBase.MaxWorkers` = the
+  player's limit (public setter; the panel's +/− button sets it, see
+  `UI.InfoPanels.WorkersCountChanger`).
+- **Daily cap by volume:** `ProductionWork.MaxDayProduction` =
+  `floor(ProductionData.maxDayProductionPer100m3 × Volume × 0.01)`. 0 = no cap.
+- ⚠️ `ProductionWork.DailyProducedAmount` resets each day **only** for virtual
+  productions (`ResetDailyLimits`). For normal production it keeps growing.
+  Track a day-start value yourself.
+- Weather: `ProductionsData.GetTemperatureEfficiency(temp)` (a curve);
+  `ProductionWork.GetCurrentTemperatureEfficiency()` (1 with PerfectWeather).
+- Private fields in `Work`: `_lawsController`, `_workersConfig`,
+  `_stockroomsController`, `_structure`.
+
+### 9.5b Food
+
+- `Game.FoodConsumingConfig` (ScriptableObject): `GetFoodConsumingData()` →
+  `WorkerConsumePerDay`, `SoldierConsumePerDay`, `ChildConsumePerDay`.
+- `FoodConsumeController` feeds everyone once per day at
+  `GameConfig.hourOfConsuming`. Each person eats `res_food_rations`, or
+  `res_cans` if rations run short. Amount × `LawsController.GetConsumptionModifier()`
+  (Rations_Halved law).
+- People: `CitizensController.Citizens` (`List<Character>`), `Character.IsChild`,
+  `Character.IsSoldier`. Static counts: `CitizensController.CitizensCount`,
+  `ChildrenCount`, `WorkersController.WorkersCount`.
+
+### 9.5c Selection and service lookup
+
+- Selected building = `InfoPanelController.CurrentDisplayedPanel.Structure`
+  (`Controllers.InfoPanelController`, a `MonoBehaviourSingleton` from
+  `Laungage.dll`). Find it with `Object.FindAnyObjectByType<InfoPanelController>()`.
+- Any Zenject service: `Object.FindAnyObjectByType<Zenject.SceneContext>().Container.TryResolve<T>()`.
+- Buildings: `Controllers.BuildingsController.Buildings` / `AdaptedBuildings`.
+- Building name: `structure.Draft.GetNameBuilding()`. Stable id:
+  `structure.GetId()`. Save id: `SaveHandler.SaveData.GameplayId`.
+- Resource name: `ResourceData.GetName()` (localised).
+
 ### 9.6 Map, fog of war, camera
 
 - Map generation: `Map.GetMapGenerator()`, `Map.OnGenerated`,
@@ -515,7 +585,7 @@ Names are from `Ifz.dll`. Source tag in brackets. ❓ = not checked by us.
 
 | Game method | Owner mod | Note |
 |-------------|-----------|------|
-| _(none yet)_ | | |
+| _(none — productionPlanner uses no Harmony patches)_ | | |
 
 ---
 
@@ -658,6 +728,12 @@ Researched on 2026-10-04. Clone again for full detail.
 ## 15. The research folder  [#research]
 
 - `research/` holds third-party mods for study. Kurzon uploads them.
+- `research/Managed.zip` holds the game's `Managed` folder (incl. `Ifz.dll`).
+  Use it to build and decompile. ⚠️ It is game property in a public repository;
+  Kurzon decides whether it stays.
+- Decompiled research mods worth reading: `ProductionDashboard.dll` (selected
+  building via `InfoPanelController`), `IFZBuildingManager.dll` (save ids,
+  worker limits, F5 key), `ExpandedCitizensPanel.dll`.
 - Do not ship anything from `research/` in `plugins/` or in a release.
 - Before you copy an idea or code, check the licence. JaySNL is MIT (credit
   them). If a repo has no licence, take ideas only, not code.

@@ -1,6 +1,6 @@
 # Hotkeys
 
-> **File version:** 1.0.0 · **Last edit:** 2026-10-04 01:00 UTC
+> **File version:** 1.1.0 · **Last edit:** 2026-10-04 10:26 UTC
 
 Every hotkey in the IFZ Compilation is unique across all mods and avoids the game's own keys.
 You can change each key in the mod's settings file (`BepInEx/config/kurzon.ifz.<modName>.cfg`).
@@ -10,7 +10,7 @@ You can change each key in the mod's settings file (`BepInEx/config/kurzon.ifz.<
 | Key | Mod | Action |
 |-----|-----|--------|
 | F10 (recommended setting) | ConfigurationManager | Open the mod settings window |
-| _No mod hotkeys yet._ | | |
+| F6 | productionPlanner | Open or close the production planner window |
 
 ## Game keys that the mods never use
 
