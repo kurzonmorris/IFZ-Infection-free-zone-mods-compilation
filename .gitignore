@@ -1,0 +1,13 @@
+bin/
+obj/
+*.user
+*.suo
+.vs/
+.idea/
+*.bak
+*.tmp
+.DS_Store
+Thumbs.db
+decompiled/
+.env
+.env.*

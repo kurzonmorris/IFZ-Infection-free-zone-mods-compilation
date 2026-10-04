@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ModName>template</ModName>
+    <Version>0.1.0</Version>
+    <AssemblyName>IFZ-$(ModName)-v$(Version)</AssemblyName>
+    <RootNamespace>IFZ.Template</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="BepInEx"><HintPath>$(IFZGameDir)/BepInEx/core/BepInEx.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="0Harmony"><HintPath>$(IFZGameDir)/BepInEx/core/0Harmony.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="Ifz"><HintPath>$(IFZManaged)/Ifz.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine"><HintPath>$(IFZManaged)/UnityEngine.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine.CoreModule"><HintPath>$(IFZManaged)/UnityEngine.CoreModule.dll</HintPath><Private>false</Private></Reference>
+  </ItemGroup>
+
+  <Target Name="DeployMod" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'">
+    <ItemGroup>
+      <OldGameCopies Include="$(IFZPluginDir)/IFZ-$(ModName)-v*.dll" />
+      <OldRepoCopies Include="$(IFZRepoPlugins)/IFZ-$(ModName)-v*.dll" />
+    </ItemGroup>
+    <Delete Files="@(OldGameCopies);@(OldRepoCopies)" />
+    <MakeDir Directories="$(IFZPluginDir);$(IFZRepoPlugins)" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(IFZPluginDir)" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(IFZRepoPlugins)" />
+  </Target>
+</Project>
