@@ -6,6 +6,7 @@ using BepInEx.Logging;
 using Controllers;
 using Gameplay.Production;
 using Gameplay.Rebuilding;
+using HarmonyLib;
 using UnityEngine;
 
 namespace IFZ.ProductionPlanner
@@ -24,7 +25,7 @@ namespace IFZ.ProductionPlanner
     {
         public const string Guid = "kurzon.ifz.productionPlanner";
         public const string Name = "IFZ Production Planner";
-        public const string Version = "0.1.0";
+        public const string Version = "0.2.0";
 
         internal static ManualLogSource Log;
 
@@ -42,6 +43,8 @@ namespace IFZ.ProductionPlanner
         private Structure _shownStructure;
         private string _goalText = "";
         private float _nextAuto;
+        private float _nextCrewCheck;
+        private Harmony _harmony;
         private readonly int _windowId = Guid.GetHashCode();
 
         private void Awake()
@@ -55,6 +58,8 @@ namespace IFZ.ProductionPlanner
             _useHauling = Config.Bind("Factors", "UseHauling", true, "Include an allowance for time workers spend carrying resources.");
             _haulingPercent = Config.Bind("Factors", "HaulingPercent", 20f, new ConfigDescription("Percent of work time lost to carrying resources. An estimate; tune it against 'Produced today'.", new AcceptableValueRange<float>(0f, 90f)));
             _autoInterval = Config.Bind("Auto", "RecheckSeconds", 5f, new ConfigDescription("Seconds between automatic worker adjustments.", new AcceptableValueRange<float>(1f, 120f)));
+            _harmony = new Harmony(Guid);
+            Patches.Apply(_harmony);
             Logger.LogInfo($"{Name} v{Version} loaded.");
         }
 
@@ -73,6 +78,11 @@ namespace IFZ.ProductionPlanner
             try
             {
                 if (_toggleKey.Value.IsDown()) _show = !_show;
+                if (Time.unscaledTime >= _nextCrewCheck)
+                {
+                    _nextCrewCheck = Time.unscaledTime + 2f;
+                    Crews.Maintain();
+                }
                 if (Time.unscaledTime >= _nextAuto)
                 {
                     _nextAuto = Time.unscaledTime + _autoInterval.Value;
@@ -104,12 +114,15 @@ namespace IFZ.ProductionPlanner
             }
         }
 
+        private void OnDestroy() => _harmony?.UnpatchSelf();
+
         private void OnGUI()
         {
-            if (!_enabled.Value || !_show) return;
+            if (!_enabled.Value) return;
             try
             {
-                _window = GUILayout.Window(_windowId, _window, DrawWindow, $"Production Planner v{Version}");
+                if (_show) _window = GUILayout.Window(_windowId, _window, DrawWindow, $"Production Planner v{Version}");
+                WorkerWindow.OnGUI();
             }
             catch (Exception e)
             {
@@ -136,9 +149,9 @@ namespace IFZ.ProductionPlanner
             }
 
             GUILayout.Label("<b>" + Planner.BuildingName(structure) + "</b>");
+            DrawStaff(structure);
             if (!(structure.CurrentWork is ProductionWork work) || work.ProductionData == null)
             {
-                GUILayout.Label("This building has no production. Not supported yet.");
                 Footer();
                 return;
             }
@@ -258,6 +271,45 @@ namespace IFZ.ProductionPlanner
                 ? $"Produced today: {plan.ProducedToday}"
                 : $"Produced since tracking began today: {plan.ProducedToday} (full count from tomorrow)");
             Footer();
+        }
+
+        private void DrawStaff(Structure structure)
+        {
+            var staff = Crews.StaffWork(structure);
+            if (staff == null)
+            {
+                GUILayout.Label("No permanent workers in this building.");
+                return;
+            }
+            bool off = Crews.IsOff(staff);
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Priority:", GUILayout.Width(60f));
+            GUI.enabled = !off;
+            for (int p = 1; p <= Crews.MaxPriority; p++)
+            {
+                var old = GUI.color;
+                if (staff.Priority == p) GUI.color = Color.green;
+                if (GUILayout.Button(p.ToString(), GUILayout.Width(24f)) && staff.Priority != p) Crews.SetPriority(staff, p);
+                GUI.color = old;
+            }
+            GUI.enabled = true;
+            if (GUILayout.Button(off ? "Turn on" : "Turn off", GUILayout.Width(70f)))
+            {
+                if (off) Crews.TurnOn(structure, staff);
+                else Crews.TurnOff(structure, staff);
+            }
+            GUILayout.EndHorizontal();
+            if (off)
+            {
+                GUILayout.Label("<color=orange>Turned off: no workers, locks cleared.</color>");
+                return;
+            }
+            if (staff.Priority > Crews.MaxPriority)
+                GUILayout.Label($"Priority {staff.Priority} (alarm boost).");
+            GUILayout.BeginHorizontal();
+            GUILayout.Label($"Workers {staff.Workers.Count}/{staff.MaxWorkers} (slots {staff.InitialMaxWorkers}) · locked {Crews.LockList(structure).Count}");
+            if (GUILayout.Button("Workers…", GUILayout.Width(80f))) WorkerWindow.Show(structure);
+            GUILayout.EndHorizontal();
         }
 
         private void Footer()

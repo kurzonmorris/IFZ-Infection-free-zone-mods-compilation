@@ -1,6 +1,6 @@
 # Features and versions
 
-> **File version:** 1.4.0 · **Last edit:** 2026-10-05 19:31 UTC
+> **File version:** 1.5.0 · **Last edit:** 2026-10-05 19:48 UTC
 
 Every edit, feature, and change to any file in this repository. Newest first.
 Rules: see `Explained-game_infectionFreeZone.md` §1.2 and §1.3.
@@ -9,27 +9,35 @@ Rules: see `Explained-game_infectionFreeZone.md` §1.2 and §1.3.
 
 | File | Version |
 |------|---------|
-| README.md | 1.1.0 |
-| FEATURES_AND_VERSIONS.md | 1.4.0 |
-| Explained-game_infectionFreeZone.md | 1.2.0 |
+| README.md | 1.2.0 |
+| FEATURES_AND_VERSIONS.md | 1.5.0 |
+| Explained-game_infectionFreeZone.md | 1.3.0 |
 | Explained-game_engineMap.md | 1.0.0 |
 | docs/INSTALL.md | 1.0.0 |
 | docs/HOTKEYS.md | 1.1.0 |
 | mods/_template (Plugin.cs, template.csproj, README.md) | 1.0.0 (template mod 0.1.0) |
 | mods/Directory.Build.props | 1.0.0 |
-| plugins/README.md | 1.1.0 |
+| plugins/README.md | 1.2.0 |
 | research/README.md | 1.2.0 |
 | .github/workflows/release.yml | 1.0.0 |
-| mods/productionPlanner (Plugin.cs, Planner.cs, GoalStore.cs, productionPlanner.csproj) | 0.1.0 |
-| mods/productionPlanner/README.md | 1.0.0 |
-| mods/productionPlanner/SPEC.md | 1.1.0 |
-| plugins/IFZ-productionPlanner-v0.1.0.dll | 0.1.0 |
+| mods/productionPlanner (Plugin.cs, Planner.cs, GoalStore.cs, Crews.cs, Patches.cs, WorkerWindow.cs, productionPlanner.csproj) | 0.2.0 |
+| mods/productionPlanner/README.md | 1.1.0 |
+| mods/productionPlanner/SPEC.md | 1.3.0 |
+| plugins/IFZ-productionPlanner-v0.2.0.dll | 0.2.0 |
 | Pack (Releases zip) | not released |
 
 ## Change log
 
 | Date and time (UTC) | File | Version | Change |
 |---------------------|------|---------|--------|
+| 2026-10-05 19:48 | mods/productionPlanner, plugins/IFZ-productionPlanner-v0.2.0.dll | 0.2.0 | Phase 1: priorities 1–9, building on/off, worker window (resizable, sort, search, arrows), lock lists that keep named workers on a job; sick keep their place. Replaces v0.1.0 DLL. |
+| 2026-10-05 19:48 | mods/productionPlanner/SPEC.md | 1.2.0 | Recorded Kurzon's answers (experience day, foreman, Marksman skills, squad shifts, guards); new build order. |
+| 2026-10-05 19:48 | mods/productionPlanner/SPEC.md | 1.3.0 | Phase 1 marked built. |
+| 2026-10-05 19:48 | mods/productionPlanner/README.md | 1.1.0 | New source files and 0.2.0 limits. |
+| 2026-10-05 19:48 | Explained-game_infectionFreeZone.md | 1.3.0 | §9.5d worker assignment facts; patch owners. |
+| 2026-10-05 19:48 | README.md | 1.2.0 | productionPlanner 0.2.0 features. |
+| 2026-10-05 19:48 | plugins/README.md | 1.2.0 | DLL renamed to v0.2.0. |
+| 2026-10-05 19:48 | FEATURES_AND_VERSIONS.md | 1.5.0 | Recorded the changes above. |
 | 2026-10-05 19:31 | mods/productionPlanner/SPEC.md | 1.1.0 | Night shift: studied IFZ24HourWorkers, per-worker shift design, questions Q10–Q12. |
 | 2026-10-05 19:31 | research/README.md | 1.2.0 | Listed IFZ24HourWorkers.dll. |
 | 2026-10-05 19:31 | FEATURES_AND_VERSIONS.md | 1.4.0 | Recorded the changes above. |

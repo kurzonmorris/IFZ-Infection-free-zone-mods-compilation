@@ -1,6 +1,6 @@
 # productionPlanner — feature spec (workforce expansion)
 
-> **File version:** 1.1.0 · **Last edit:** 2026-10-05 19:31 UTC
+> **File version:** 1.3.0 · **Last edit:** 2026-10-05 19:48 UTC
 >
 > Kurzon's requests of 2026-10-04 and 2026-10-05, with a feasibility check
 > against the decompiled game (`Ifz.dll`, 2026-09-18). Status per feature:
@@ -154,46 +154,59 @@
 
 ---
 
-## 11. Open questions
+## 11. Decisions (Kurzon, 2026-10-05) and open questions
 
-1. **What is a "day" of experience?** A day with a full shift worked (my
-   suggestion), or a calendar day while assigned?
-2. **Does experience fade** when a worker does not use a job, or only through
-   the 3-job limit?
-3. **Defensive structures:** what does job experience boost there (damage,
-   fire rate, reach)? Is it separate from Marksman?
-4. **Foreman boost:** fixed +25 % to the building, or by foreman level
-   (10 / 25 / 50 %)? Kurzon's "29 days" vs 30 by the table — which is right?
-   Does the foreman also work like a normal worker?
-5. **Experience limit with nobody qualified:** the building stays empty.
-   Acceptable?
-6. **Warehouse:** confirm +500 per worker on top of the base, and that this
-   can be a later phase.
-7. **Squad skill boosts:** what does each level add (for example the skill's
-   effect × 1.0 / 1.25 / 1.5)? Days per level after Novice?
-8. **Marksman:** boost per level? Are 6 / 15 / 40 hours totals or steps
-   (6, +15, +40)? Game hours?
-9. **House guards:** do guards also live in the house? Is the 50 % per resident
-   of that house, or for the whole colony?
+**Decided:**
+
+1. **Experience day** = one full work shift actually worked, travel from home
+   to the workplace included.
+2. **Experience fades** only through the 3-job limit.
+3. **Defensive structures and squad combat** use three separate skills that
+   level up together:
+
+   | Level | Marksman accuracy (damage) | Marksman fire rate | Marksman range |
+   |-------|----------------------------|--------------------|----------------|
+   | Novice | +10 % | +5 % | +10 % |
+   | Moderate | +20 % | +10 % | +20 % |
+   | Expert | +40 % | +20 % | +30 % |
+
+   (Replaces the single "Marksman" skill of §8.)
+4. **Foreman** boost = by foreman level, for the whole building (10 / 25 /
+   50 %). None → Expert Foreman = **30 days**. The foreman works as a normal
+   worker with no personal boost.
+5. **Experience limit with nobody qualified:** the building stays empty. OK.
+6. **Warehouse:** +500 per worker above the normal capacity. Later phase.
+7. **Squad skills:** time counts in **shifts**; day and night are separate
+   shifts, so 24 hours = 2 shifts. Normal squad skills: 10 / 25 / 50 %.
+   Combat skills: the same as guards (table in item 3).
+8. **Marksman** = the three skills in item 3.
+9. **House guards** live in the house they guard. The 50 % applies only to the
+   residents of that house.
+
+**Still open:**
+
+- Q7a. Squad skills: how many shifts per level? (Novice is reached when the
+  skill is taught.) For example 6 / 10 / 14 shifts (= 3 / 5 / 7 days)?
+- Q8a. Marksman: 6 / 15 / 40 hours of shooting — totals or steps
+  (6, then +15, then +40)? In-game hours?
 10. **Night crew size:** the same as the day max workers (doubles output),
     or its own number?
 11. **When night shift starts:** a manual switch per building, automatic when
     there are free workers, or both?
-12. **Outdoor night work:** farms, foresters and other outdoor jobs put night
-    workers in the open when swarms move. Allow night shift on outdoor jobs,
-    or only indoor buildings?
+12. **Outdoor night work:** allow night shift on outdoor jobs (farms,
+    foresters), or only indoor buildings?
 
 ## 12. Build order (proposal)
 
 | Phase | Content | Status |
 |-------|---------|--------|
-| 1 | §1 priorities and Off · §2 lock · §3 worker window | ready to build |
-| 2 | §4 job experience | after Q1, Q2, Q5 |
-| 3 | §5 foreman | after Q4 |
-| 4 | §6 houses | ready after phase 1 |
-| 5 | §8 squad skills and Marksman | after Q3, Q7, Q8 |
+| 1 | §1 priorities and Off · §2 lock · §3 worker window | built in 0.2.0, testing |
+| 2 | §4 job experience | ready |
+| 3 | §5 foreman | ready |
+| 4 | §6 houses | ready |
+| 5 | §8 squad skills and Marksman | after Q7a, Q8a |
 | 6 | §10 night shift | after Q10–Q12 |
-| 7 | §7 warehouse staff | needs research |
-| 8 | §9 house guards | needs research |
+| 7 | §9 house guards | needs research |
+| 8 | §7 warehouse staff | needs research |
 
 Each phase ships as a new productionPlanner version for in-game testing.

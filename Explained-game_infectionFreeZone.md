@@ -1,6 +1,6 @@
 # Infection Free Zone — Modding Reference
 
-> **File version:** 1.2.0 · **Last edit:** 2026-10-04 22:32 UTC
+> **File version:** 1.3.0 · **Last edit:** 2026-10-05 19:48 UTC
 >
 > **Purpose:** Read this file before you work on any mod in this repository. It
 > holds every fact we found about the game, the tools, and our own project
@@ -556,6 +556,49 @@ Names are from `Ifz.dll`. Source tag in brackets. ❓ = not checked by us.
   `structure.GetId()`. Save id: `SaveHandler.SaveData.GameplayId`.
 - Resource name: `ResourceData.GetName()` (localised).
 
+### 9.5d Worker assignment (verified 2026-10-05)
+
+- `Gameplay.Units.Workers.WorkSystem.WorkController` (Zenject): `Works`,
+  `AvailableWorkers`, `EmploymentPriorities`. It handles
+  `WorkPriorityChangedSignal(work, priority, allBuildings)` (namespace
+  `Gameplay.Units.Player.Workers.WorkSystem.Signals`); fire it on the
+  `SignalBus` to change a priority like the panel does.
+- `WorksPriorityManager`: `_prioritiesWorks = new PriorityWorkGroup[11]`
+  (priority 0–10). Panel buttons = 1–5. Alarm adds +5 to guard works
+  (`WorkersCountChanger.AlarmPriorityOffset`). Priority 0 = no workers.
+- Who moves workers: `RealignWorkers` (takes the closest worker from a lower
+  priority via `GetClosestWorker` → `PriorityWorkGroup.TryGetClosestWorker`),
+  `PriorityWorkGroup.AlignWorkers` (balances inside one priority, uses
+  `WorkBase.GetClosestWorker`), `GetLeastNeededWorker` (squad draft, takes
+  `Workers[0]`, sets `SetUnderSquadProduction(true)`).
+- `WorkBase.RemoveWorkersAboveLimit` (max workers lowered) and the panel "−"
+  remove `Workers[0]` first.
+- `WorkBase.AddWorker` refuses when full, paused or already in the list.
+  `Work.AddWorker` then calls `WorkModule.AssignWork`, which unassigns the
+  old work. A worker inside an area work (scavenging) must be unassigned
+  first (`CanBeAssignedToWork`).
+- `WorkModule.UnassignWork` also calls `Character.FindBestHouse()`: changing
+  job can change house.
+- Sick: `SicknessController` unassigns the worker and calls
+  `WorkersController.RemoveWorker` — the sick person stays in
+  `CitizensController.Citizens` but leaves `WorkersController.Workers`.
+- Soldiers: `CharactersConverter` removes them from the worker list;
+  `Character.IsSoldier`.
+- Character data: `Character.Name`, `Character.Id`,
+  `CharacterInfo.Gender` (type in `CharacterNameGenerator.dll`), `.Age`.
+- No work-experience system exists. `KnowledgeGainer` (squads) tracks only
+  `Shooting`, `MeleeAttack`, `Scavenging`, `Driving`; `SkillId`: Slasher,
+  Strong, HawkEye, SharpShooter, RaceDriver, EconomicDriver, Shoplifter,
+  Inspector.
+- Houses: `HouseAssigner` → `HouseRequest` sorts houses by distance from the
+  citizen's **current position**, takes the first with
+  `HasSpaceForCitizen()`. `Character.HouseData.House`.
+- Turning: `SicknessController.KillAndTurn` kills critical sick, then spawns
+  `GetChanceToTurn() × deaths` fresh infected (`inf_human_fresh`) in one
+  building.
+- Work time per worker: `WorkModule.IsWorking()` = `CurrentWork.IsWorkHour()`.
+  `WorkerBehaviour.Tick`: tired workers go home; carrying goods stops at night.
+
 ### 9.6 Map, fog of war, camera
 
 - Map generation: `Map.GetMapGenerator()`, `Map.OnGenerated`,
@@ -589,7 +632,9 @@ Names are from `Ifz.dll`. Source tag in brackets. ❓ = not checked by us.
 
 | Game method | Owner mod | Note |
 |-------------|-----------|------|
-| _(none — productionPlanner uses no Harmony patches)_ | | |
+| `WorksPriorityManager` constructor (postfix) | productionPlanner | Resizes priority groups 11 → 15 (priorities 1–9, alarm +5) |
+| `PriorityWorkGroup.TryGetClosestWorker` (postfix) | productionPlanner | Skips locked workers |
+| `WorkBase.GetClosestWorker` (postfix) | productionPlanner | Prefers unlocked workers |
 
 ---
 
