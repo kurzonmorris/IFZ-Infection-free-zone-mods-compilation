@@ -1,6 +1,6 @@
 # productionPlanner — feature spec (workforce expansion)
 
-> **File version:** 1.0.0 · **Last edit:** 2026-10-05 19:28 UTC
+> **File version:** 1.1.0 · **Last edit:** 2026-10-05 19:31 UTC
 >
 > Kurzon's requests of 2026-10-04 and 2026-10-05, with a feasibility check
 > against the decompiled game (`Ifz.dll`, 2026-09-18). Status per feature:
@@ -124,13 +124,33 @@
 - **Hard part:** units inside a house do not fight in the game. Shooting from
   houses and "slowly kill" need custom logic.
 
-## 10. Night shift  🔴
+## 10. Night shift  🟡
 
 - When there are more people than jobs, buildings get a second shift. Night
   workers sleep by day and work by night.
-- Game fact: work time = `Work.IsWorkHour()` (sunrise/sunset + laws).
-- Reference mod: Nexus IFZ mod 84. **Not in `research/` yet** and Nexus is
-  blocked from the build session.
+- Game facts:
+  - A worker works only while `WorkModule.IsWorking()` is true. It returns
+    `CurrentWork.IsWorkHour()` (sunrise/sunset + laws).
+    `WorkerBehaviour.IsWorkHour()` gates the forum (law voting).
+  - Tired workers (`Character.IsTired`, fatigue > 0) go home to rest. Guards
+    keep working while tired.
+  - `WorkerBehaviour.ReturnResourceToStockroom(…, isNight, …)` stops carrying
+    goods at night.
+  - `DefenseWork` has its own `IsWorkHour`.
+- Reference: `research/IFZ24HourWorkers.dll` (MHMejren, "IFZ 24/7 Workers"
+  1.0.0, F12 toggle). It only forces `Work.IsWorkHour` and
+  `WorkerBehaviour.IsWorkHour` to true and clears `isNight` for carrying.
+  Everyone works all the time; there are no shifts and no sleep schedule.
+  ⚠️ Its F12 key is also Steam's screenshot key.
+- Plan (real shifts, per worker):
+  - A building with night shift on gets a second crew. The building's
+    `IsWorkHour` returns true day and night.
+  - Each worker has a shift (Day or Night) stored by the mod. Patch
+    `WorkModule.IsWorking` per worker: Day crew → the normal hours; Night crew →
+    the opposite hours. Off-shift workers go home and sleep.
+  - Night crew may carry goods at night (`isNight` → false for them).
+  - Night crew slots: extra slots on top of the day crew (see §11 Q10).
+  - The worker window gets a Day / Night column. Locks (§2) work per shift.
 
 ---
 
@@ -155,7 +175,13 @@
    (6, +15, +40)? Game hours?
 9. **House guards:** do guards also live in the house? Is the 50 % per resident
    of that house, or for the whole colony?
-10. **Night shift:** upload the Nexus mod 84 DLL to `research/`.
+10. **Night crew size:** the same as the day max workers (doubles output),
+    or its own number?
+11. **When night shift starts:** a manual switch per building, automatic when
+    there are free workers, or both?
+12. **Outdoor night work:** farms, foresters and other outdoor jobs put night
+    workers in the open when swarms move. Allow night shift on outdoor jobs,
+    or only indoor buildings?
 
 ## 12. Build order (proposal)
 
@@ -166,7 +192,7 @@
 | 3 | §5 foreman | after Q4 |
 | 4 | §6 houses | ready after phase 1 |
 | 5 | §8 squad skills and Marksman | after Q3, Q7, Q8 |
-| 6 | §10 night shift | after the reference mod |
+| 6 | §10 night shift | after Q10–Q12 |
 | 7 | §7 warehouse staff | needs research |
 | 8 | §9 house guards | needs research |
 
