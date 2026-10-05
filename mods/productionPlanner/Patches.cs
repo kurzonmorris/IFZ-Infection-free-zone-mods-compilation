@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using Gameplay.Units.Characters;
 using Gameplay.Units.Player.Workers.WorkSystem;
+using Gameplay.Units.Workers;
 using Gameplay.Units.Workers.WorkSystem;
 using HarmonyLib;
 using UnityEngine;
@@ -66,20 +67,39 @@ namespace IFZ.ProductionPlanner
     {
         private static void Postfix(WorkBase __instance, Vector3 position, ref Character __result)
         {
-            if (__result == null || !Crews.IsLocked(__result)) return;
+            if (__result == null) return;
+            string job = Experience.JobId(__instance.GetRelatedStructure());
             Character best = null;
+            var bestLevel = Level.Expert;
             float bestDistance = float.MaxValue;
             foreach (var worker in __instance.Workers)
             {
                 if (worker == null || Crews.IsLocked(worker)) continue;
+                var level = job != null ? Experience.LevelOf(worker, job) : Level.None;
                 float distance = (worker.Position - position).sqrMagnitude;
-                if (distance < bestDistance)
+                if (best == null || level < bestLevel || (level == bestLevel && distance < bestDistance))
                 {
-                    bestDistance = distance;
                     best = worker;
+                    bestLevel = level;
+                    bestDistance = distance;
                 }
             }
             if (best != null) __result = best;
+        }
+    }
+
+    [HarmonyPatch(typeof(WorkModule), nameof(WorkModule.ExecuteWork), new[] { typeof(float) })]
+    internal static class ExperienceBoostPatch
+    {
+        private static readonly FieldInfo CharacterField = AccessTools.Field(typeof(WorkModule), "_character");
+
+        private static void Prefix(WorkModule __instance, ref float timeSinceLastTick)
+        {
+            if (!Plugin.ExperienceEnabled) return;
+            var character = CharacterField.GetValue(__instance) as Character;
+            if (character == null) return;
+            float boost = Experience.BoostFor(character);
+            if (boost > 0f) timeSinceLastTick *= 1f + boost;
         }
     }
 
@@ -87,7 +107,7 @@ namespace IFZ.ProductionPlanner
     {
         public static void Apply(Harmony harmony)
         {
-            foreach (var type in new[] { typeof(PriorityGroupsPatch), typeof(SkipLockedCandidatePatch), typeof(PreferUnlockedWorkerPatch) })
+            foreach (var type in new[] { typeof(PriorityGroupsPatch), typeof(SkipLockedCandidatePatch), typeof(PreferUnlockedWorkerPatch), typeof(ExperienceBoostPatch) })
             {
                 try
                 {

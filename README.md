@@ -1,6 +1,6 @@
 # IFZ Compilation — Infection Free Zone mods
 
-> **File version:** 1.2.0 · **Last edit:** 2026-10-05 19:48 UTC
+> **File version:** 1.3.0 · **Last edit:** 2026-10-05 21:57 UTC
 
 A set of BepInEx mods for **Infection Free Zone** that are built to work together.
 Each mod is a separate DLL, so you install only what you want.
@@ -46,7 +46,7 @@ See the [install guide](docs/INSTALL.md).
 
 | Mod | Version | Type | Summary |
 |-----|---------|------|---------|
-| [Production Planner](#productionplanner--v020) | 0.2.0 | Function | Daily output goals, 9 work priorities, building on/off, and named workers locked to buildings. |
+| [Production Planner](#productionplanner--v030) | 0.3.0 | Function | Daily output goals, 9 work priorities, building on/off, named workers locked to jobs, and job experience. |
 
 <!--
 Copy this block for each mod. Keep the heading = the mod name.
@@ -65,10 +65,10 @@ Short one-line description.
 </details>
 -->
 
-### productionPlanner — v0.2.0
+### productionPlanner — v0.3.0
 
 Set a daily production goal on a building. The mod works out how many workers the building needs and tells you, or sets the max workers for you.
-File: [`IFZ-productionPlanner-v0.2.0.dll`](plugins/IFZ-productionPlanner-v0.2.0.dll) · Hotkey: **F6** · Status: test build.
+File: [`IFZ-productionPlanner-v0.3.0.dll`](plugins/IFZ-productionPlanner-v0.3.0.dll) · Hotkey: **F6** · Status: test build.
 
 <details>
 <summary><b>Planner window</b> — a floating box that follows the building you select</summary>
@@ -92,11 +92,31 @@ File: [`IFZ-productionPlanner-v0.2.0.dll`](plugins/IFZ-productionPlanner-v0.2.0.
 <summary><b>Named workers and locks</b> — keep the same people on the same job</summary>
 
 - **Workers…** opens a separate window. Move it by its title, resize it from the bottom-right corner.
-- Left: all available workers (name, gender, age, current job). Sort by name, gender or job; search by name.
+- Left: all available workers (name, gender, age, experience in this job, current job). Sort by experience, name, gender or job; search by name.
 - **→** assigns and locks a worker to this building. **←** unlocks them. **▲ / ▼** set the order.
 - **Lock current workers** locks everyone working there now. **Unlock all** frees them.
 - Unlocked workers come and go as normal. A locked worker works only this job. They leave the list only if the building is turned off, they die, they are drafted into a squad or the army, or max workers drops below their place on the list (the bottom of the list goes first).
 - Sick workers keep their place and show **In hospital**. They return when they are well.
+
+</details>
+
+<details>
+<summary><b>Job experience</b> — workers get better at the jobs they do</summary>
+
+- Each building type is its own job (cookhouse, sawmill, forester's hut, farm, tower, …).
+- One experience day = one full work shift actually worked, travel to work included.
+
+  | Level | Speed boost | Days in the job |
+  |-------|-------------|-----------------|
+  | None | 0 % | 0 |
+  | Novice | +10 % | 3 |
+  | Moderate | +25 % | 8 |
+  | Expert | +50 % | 15 |
+
+- A worker keeps up to 3 jobs. One new job can be in training at a time; when it reaches Novice, the oldest job is forgotten. The **i** button in the worker window lists a worker's jobs, with **Forget** buttons.
+- **Experience limit** per building (Any / Novice / Moderate / Expert): only qualified workers are taken on. Locked workers stay even if the limit rises. With a limit on, the mod fills the building itself; set its max workers with − / + in the planner window.
+- **Auto-pick:** when a more experienced worker exists, the mod moves them into the job in place of a less experienced unlocked worker. Free workers and scavengers go first. Turn it off with `Experience / AutoPickExperienced`.
+- The planner's worker calculation includes the experience of the current workers (tick box **Experience**).
 
 </details>
 
