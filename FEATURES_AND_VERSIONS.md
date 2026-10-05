@@ -1,6 +1,6 @@
 # Features and versions
 
-> **File version:** 1.2.0 · **Last edit:** 2026-10-04 22:32 UTC
+> **File version:** 1.3.0 · **Last edit:** 2026-10-05 19:28 UTC
 
 Every edit, feature, and change to any file in this repository. Newest first.
 Rules: see `Explained-game_infectionFreeZone.md` §1.2 and §1.3.
@@ -10,7 +10,7 @@ Rules: see `Explained-game_infectionFreeZone.md` §1.2 and §1.3.
 | File | Version |
 |------|---------|
 | README.md | 1.1.0 |
-| FEATURES_AND_VERSIONS.md | 1.2.0 |
+| FEATURES_AND_VERSIONS.md | 1.3.0 |
 | Explained-game_infectionFreeZone.md | 1.2.0 |
 | Explained-game_engineMap.md | 1.0.0 |
 | docs/INSTALL.md | 1.0.0 |
@@ -22,6 +22,7 @@ Rules: see `Explained-game_infectionFreeZone.md` §1.2 and §1.3.
 | .github/workflows/release.yml | 1.0.0 |
 | mods/productionPlanner (Plugin.cs, Planner.cs, GoalStore.cs, productionPlanner.csproj) | 0.1.0 |
 | mods/productionPlanner/README.md | 1.0.0 |
+| mods/productionPlanner/SPEC.md | 1.0.0 |
 | plugins/IFZ-productionPlanner-v0.1.0.dll | 0.1.0 |
 | Pack (Releases zip) | not released |
 
@@ -29,6 +30,8 @@ Rules: see `Explained-game_infectionFreeZone.md` §1.2 and §1.3.
 
 | Date and time (UTC) | File | Version | Change |
 |---------------------|------|---------|--------|
+| 2026-10-05 19:28 | mods/productionPlanner/SPEC.md | 1.0.0 | New. Spec for the workforce expansion: 9 priorities, building off, worker locking and window, job experience, foreman, houses, warehouse staff, squad skills, Marksman, house guards, night shift. Feasibility, open questions, build order. |
+| 2026-10-05 19:28 | FEATURES_AND_VERSIONS.md | 1.3.0 | Recorded the spec. |
 | 2026-10-04 22:32 | Explained-game_engineMap.md | 1.0.0 | New. Look-up lists from the decompiled game: assemblies, Rewired input actions, enums, difficulty settings, configs, signals, controllers, 178 console commands, namespaces. |
 | 2026-10-04 22:32 | Explained-game_infectionFreeZone.md | 1.2.0 | Linked the engine map; recorded removal of Managed.zip and that builds still need the game DLLs; updated open questions. |
 | 2026-10-04 22:32 | FEATURES_AND_VERSIONS.md | 1.2.0 | Recorded the changes above. |
