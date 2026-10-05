@@ -75,7 +75,7 @@ namespace IFZ.ProductionPlanner
             foreach (var worker in __instance.Workers)
             {
                 if (worker == null || Crews.IsLocked(worker)) continue;
-                var level = job != null ? Experience.LevelOf(worker, job) : Level.None;
+                var level = job != null ? Experience.SelectionLevel(worker, job) : Level.None;
                 float distance = (worker.Position - position).sqrMagnitude;
                 if (best == null || level < bestLevel || (level == bestLevel && distance < bestDistance))
                 {
@@ -98,8 +98,8 @@ namespace IFZ.ProductionPlanner
             if (!Plugin.ExperienceEnabled) return;
             var character = CharacterField.GetValue(__instance) as Character;
             if (character == null) return;
-            float boost = Experience.BoostFor(character);
-            if (boost > 0f) timeSinceLastTick *= 1f + boost;
+            float factor = (1f + Experience.BoostFor(character)) * (1f + Experience.ForemanBoost(character.WorkModule.CurrentWork));
+            if (factor > 1f) timeSinceLastTick *= factor;
         }
     }
 

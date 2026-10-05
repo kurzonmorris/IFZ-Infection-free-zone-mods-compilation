@@ -1,6 +1,6 @@
 # Infection Free Zone — Modding Reference
 
-> **File version:** 1.4.0 · **Last edit:** 2026-10-05 21:57 UTC
+> **File version:** 1.5.0 · **Last edit:** 2026-10-05 23:43 UTC
 >
 > **Purpose:** Read this file before you work on any mod in this repository. It
 > holds every fact we found about the game, the tools, and our own project
@@ -641,7 +641,7 @@ Names are from `Ifz.dll`. Source tag in brackets. ❓ = not checked by us.
 | `WorksPriorityManager` constructor (postfix) | productionPlanner | Resizes priority groups 11 → 15 (priorities 1–9, alarm +5) |
 | `PriorityWorkGroup.TryGetClosestWorker` (postfix) | productionPlanner | Skips locked workers |
 | `WorkBase.GetClosestWorker` (postfix) | productionPlanner | Picks the unlocked, least experienced worker to move |
-| `WorkModule.ExecuteWork(float)` (prefix) | productionPlanner | Scales work time by job experience (+10/25/50 %) |
+| `WorkModule.ExecuteWork(float)` (prefix) | productionPlanner | Scales work time by job experience (+10/25/50 %) × foreman boost of the building |
 
 ---
 

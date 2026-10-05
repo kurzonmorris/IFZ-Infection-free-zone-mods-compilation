@@ -253,6 +253,7 @@ namespace IFZ.ProductionPlanner
                 }
             }
 
+            Experience.RefreshForemen(buildings);
             foreach (var pair in buildings)
             {
                 var structure = pair.Key;
@@ -343,7 +344,7 @@ namespace IFZ.ProductionPlanner
             foreach (var w in new List<Character>(work.Workers))
             {
                 if (w == null || (locks != null && locks.Contains(w.Id))) continue;
-                if (Experience.LevelOf(w, job) < min) w.WorkModule.UnassignWork(true);
+                if (Experience.SelectionLevel(w, job) < min) w.WorkModule.UnassignWork(true);
             }
             while (work.Workers.Count < limit.Desired && _moves < MovesPerCheck)
             {
@@ -368,7 +369,7 @@ namespace IFZ.ProductionPlanner
             foreach (var w in work.Workers)
             {
                 if (w == null || (locks != null && locks.Contains(w.Id))) continue;
-                var level = Experience.LevelOf(w, job);
+                var level = Experience.SelectionLevel(w, job);
                 if (weakest == null || level < weakestLevel)
                 {
                     weakest = w;
@@ -407,10 +408,10 @@ namespace IFZ.ProductionPlanner
                 var current = c.WorkModule.CurrentWork;
                 if (current == target) continue;
                 float days = Experience.Days(c, job);
-                var level = Experience.LevelFor(days);
+                var level = Experience.SelectionLevel(c, job);
                 if (level < minLevel || level <= mustBeat) continue;
                 string currentJob = Experience.CurrentJob(c);
-                if (currentJob != null && currentJob != job && Experience.LevelOf(c, currentJob) >= level) continue;
+                if (currentJob != null && currentJob != job && Experience.SelectionLevel(c, currentJob) >= level) continue;
                 bool free = current == null || c.WorkModule.HasParentWork;
                 bool better = best == null
                     || level > bestLevel

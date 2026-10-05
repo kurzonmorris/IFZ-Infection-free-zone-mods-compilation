@@ -153,7 +153,7 @@ namespace IFZ.ProductionPlanner
                 sum += 1f + Experience.BoostFor(worker);
                 count++;
             }
-            return count == 0 ? 1f : sum / count;
+            return (count == 0 ? 1f : sum / count) * (1f + Experience.ForemanBoost(work));
         }
 
         public static PlanResult Calculate(ProductionWork work, float goalPerDay, Settings settings)

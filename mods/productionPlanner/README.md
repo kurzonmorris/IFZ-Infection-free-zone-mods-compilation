@@ -1,8 +1,8 @@
 # productionPlanner
 
-> **File version:** 1.2.0 · **Last edit:** 2026-10-05 21:57 UTC
+> **File version:** 1.3.0 · **Last edit:** 2026-10-05 23:43 UTC
 
-Mod version **0.3.0** · DLL `IFZ-productionPlanner-v0.3.0.dll` · GUID `kurzon.ifz.productionPlanner` · Hotkey **F6**
+Mod version **0.4.0** · DLL `IFZ-productionPlanner-v0.4.0.dll` · GUID `kurzon.ifz.productionPlanner` · Hotkey **F6**
 
 Source files:
 - `Plugin.cs` — config, F6 window (IMGUI), Auto loop.
@@ -26,7 +26,7 @@ workers needed     = ceil(goal ÷ per worker per day)
 Limits: `InitialMaxWorkers` (slots from building volume) and `MaxDayProduction` (daily cap from volume).
 Game facts behind this: `Explained-game_infectionFreeZone.md` §9.5a–§9.5c.
 
-## Not handled in 0.3.0
+## Not handled in 0.4.0
 
 - Buildings without a `ProductionWork` (for example farms, sawmill, forester, gather works) show "not supported".
 - Rest and fatigue are not modelled separately. The hauling allowance covers them.
@@ -36,8 +36,10 @@ Game facts behind this: `Explained-game_infectionFreeZone.md` §9.5a–§9.5c.
 - If the mod is removed, buildings at priority 6–9 keep that number; guards at 6–9 during an alarm can then drop out of the game's lists until the priority is set again.
 - One new job can be in training at a time. Starting a different new job resets that training.
 - With an experience limit on, the native panel's max workers shows the mod's working number; the wanted max is in the planner window.
+- The foreman role takes the slot of the job it replaced. If the foreman later learns 3 other jobs, the foreman role can be forgotten as the oldest.
+- The foreman boost and the personal boost multiply: (1 + personal) × (1 + foreman).
 - Auto-pick may fight the game's own balancing and move people more often than vanilla. Watch for this in testing.
 
 ## Tests
 
-`ExperienceRules` was tested outside the game (14 checks: level thresholds, 3-job limit, one training slot, forget oldest on reaching Novice, cap at 15 days). All passed on 2026-10-05.
+`ExperienceRules` tested outside the game: 25 checks (level thresholds, 3-job limit, one training slot, forget oldest on reaching Novice, cap at 15 days, foreman needs Expert, foreman replaces the job and resets to 0, one foreman role per worker, foreman track accrues and caps, foreman not dropped as training, stop foreman). All passed on 2026-10-05.

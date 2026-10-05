@@ -1,6 +1,6 @@
 # plugins
 
-> **File version:** 1.3.0 · **Last edit:** 2026-10-05 21:57 UTC
+> **File version:** 1.4.0 · **Last edit:** 2026-10-05 23:43 UTC
 
 Built mod DLLs, ready to download one at a time.
 Put a DLL in `<game folder>/BepInEx/plugins/IFZ-Compilation/`. See [docs/INSTALL.md](../docs/INSTALL.md).
@@ -9,4 +9,4 @@ File names: `IFZ-<modName>-v<MAJOR>.<MINOR>.<PATCH>.dll`. Only the newest versio
 
 | DLL | Mod |
 |-----|-----|
-| `IFZ-productionPlanner-v0.3.0.dll` | Production Planner |
+| `IFZ-productionPlanner-v0.4.0.dll` | Production Planner |

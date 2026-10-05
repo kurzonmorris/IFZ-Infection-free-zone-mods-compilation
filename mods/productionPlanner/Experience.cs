@@ -20,7 +20,7 @@ namespace IFZ.ProductionPlanner
         public string Job;
         public float Days;
         public int LearnedOrder;
-        public bool Learned => Days >= ExperienceRules.NoviceDays;
+        public bool Learned => ExperienceRules.IsForemanEntry(Job) || Days >= ExperienceRules.NoviceDays;
     }
 
     internal static class Experience
@@ -50,6 +50,7 @@ namespace IFZ.ProductionPlanner
         public static string JobName(string job)
         {
             if (job == null) return "?";
+            if (ExperienceRules.IsForemanEntry(job)) return "Foreman: " + JobName(job.Substring(ExperienceRules.ForemanPrefix.Length));
             return JobNames.TryGetValue(job, out var name) ? name : job;
         }
 
@@ -82,8 +83,79 @@ namespace IFZ.ProductionPlanner
         public static float BoostFor(Character c)
         {
             string job = CurrentJob(c);
-            return job == null ? 0f : Boost(LevelOf(c, job));
+            if (job == null || ForemanOf(c) == job) return 0f;
+            return Boost(LevelOf(c, job));
         }
+
+        public static string ForemanOf(Character c)
+        {
+            if (c == null) return null;
+            Load();
+            return Data.TryGetValue(Key(c), out var list) ? ExperienceRules.ForemanJob(list) : null;
+        }
+
+        public static Level ForemanLevel(Character c) => LevelFor(Days(c, ExperienceRules.ForemanPrefix + ForemanOf(c)));
+
+        public static Level SelectionLevel(Character c, string job) => job != null && ForemanOf(c) == job ? Level.Expert : LevelOf(c, job);
+
+        public static string Title(Character c)
+        {
+            string job = ForemanOf(c);
+            if (job == null) return null;
+            var level = ForemanLevel(c);
+            return level == Level.None ? $"Foreman in training, {JobName(job)}" : $"{LevelNames[(int)level]} Foreman of the {JobName(job)}";
+        }
+
+        public static bool MakeForeman(Character c, string job)
+        {
+            Load();
+            if (c == null || !Data.TryGetValue(Key(c), out var list) || !ExperienceRules.MakeForeman(list, job)) return false;
+            _dirty = true;
+            Plugin.Log.LogInfo($"{c.Name} is now foreman in training for {JobName(job)}.");
+            return true;
+        }
+
+        public static void StopForeman(Character c)
+        {
+            Load();
+            if (c != null && Data.TryGetValue(Key(c), out var list) && ExperienceRules.StopForeman(list)) _dirty = true;
+        }
+
+        private static readonly Dictionary<WorkBase, KeyValuePair<Character, Level>> Foremen = new Dictionary<WorkBase, KeyValuePair<Character, Level>>();
+
+        public static void RefreshForemen(IEnumerable<KeyValuePair<Structure, WorkBase>> buildings)
+        {
+            Foremen.Clear();
+            foreach (var pair in buildings)
+            {
+                string job = JobId(pair.Key);
+                Character best = null;
+                float bestDays = -1f;
+                foreach (var w in pair.Value.Workers)
+                {
+                    if (w == null || ForemanOf(w) != job) continue;
+                    float days = Days(w, ExperienceRules.ForemanPrefix + job);
+                    if (days > bestDays)
+                    {
+                        best = w;
+                        bestDays = days;
+                    }
+                }
+                if (best != null) Foremen[pair.Value] = new KeyValuePair<Character, Level>(best, LevelFor(bestDays));
+            }
+        }
+
+        public static bool TryGetForeman(WorkBase work, out Character foreman, out Level level)
+        {
+            foreman = null;
+            level = Level.None;
+            if (work == null || !Foremen.TryGetValue(work, out var pair)) return false;
+            foreman = pair.Key;
+            level = pair.Value;
+            return true;
+        }
+
+        public static float ForemanBoost(WorkBase work) => TryGetForeman(work, out _, out var level) ? Boost(level) : 0f;
 
         public static void Forget(Character c, string job)
         {
@@ -117,7 +189,8 @@ namespace IFZ.ProductionPlanner
                 if (job == null) continue;
                 if (!JobNames.ContainsKey(job)) JobNames[job] = Planner.BuildingName(structure);
                 float shiftHours = work is Work w ? Planner.WorkHoursPerDay(w) : 12f;
-                Add(c, job, deltaGts / hourGts / Mathf.Max(0.5f, shiftHours));
+                string track = ForemanOf(c) == job ? ExperienceRules.ForemanPrefix + job : job;
+                Add(c, track, deltaGts / hourGts / Mathf.Max(0.5f, shiftHours));
             }
             if (_dirty && Time.unscaledTime >= _nextSave)
             {

@@ -1,6 +1,6 @@
 # Features and versions
 
-> **File version:** 1.6.0 · **Last edit:** 2026-10-05 21:57 UTC
+> **File version:** 1.7.0 · **Last edit:** 2026-10-05 23:43 UTC
 
 Every edit, feature, and change to any file in this repository. Newest first.
 Rules: see `Explained-game_infectionFreeZone.md` §1.2 and §1.3.
@@ -9,27 +9,34 @@ Rules: see `Explained-game_infectionFreeZone.md` §1.2 and §1.3.
 
 | File | Version |
 |------|---------|
-| README.md | 1.3.0 |
-| FEATURES_AND_VERSIONS.md | 1.6.0 |
-| Explained-game_infectionFreeZone.md | 1.4.0 |
+| README.md | 1.4.0 |
+| FEATURES_AND_VERSIONS.md | 1.7.0 |
+| Explained-game_infectionFreeZone.md | 1.5.0 |
 | Explained-game_engineMap.md | 1.0.0 |
 | docs/INSTALL.md | 1.0.0 |
 | docs/HOTKEYS.md | 1.1.0 |
 | mods/_template (Plugin.cs, template.csproj, README.md) | 1.0.0 (template mod 0.1.0) |
 | mods/Directory.Build.props | 1.0.0 |
-| plugins/README.md | 1.3.0 |
+| plugins/README.md | 1.4.0 |
 | research/README.md | 1.2.0 |
 | .github/workflows/release.yml | 1.0.0 |
-| mods/productionPlanner (Plugin.cs, Planner.cs, GoalStore.cs, Crews.cs, Patches.cs, WorkerWindow.cs, Experience.cs, ExperienceRules.cs, productionPlanner.csproj) | 0.3.0 |
-| mods/productionPlanner/README.md | 1.2.0 |
-| mods/productionPlanner/SPEC.md | 1.4.0 |
-| plugins/IFZ-productionPlanner-v0.3.0.dll | 0.3.0 |
+| mods/productionPlanner (Plugin.cs, Planner.cs, GoalStore.cs, Crews.cs, Patches.cs, WorkerWindow.cs, Experience.cs, ExperienceRules.cs, productionPlanner.csproj) | 0.4.0 |
+| mods/productionPlanner/README.md | 1.3.0 |
+| mods/productionPlanner/SPEC.md | 1.5.0 |
+| plugins/IFZ-productionPlanner-v0.4.0.dll | 0.4.0 |
 | Pack (Releases zip) | not released |
 
 ## Change log
 
 | Date and time (UTC) | File | Version | Change |
 |---------------------|------|---------|--------|
+| 2026-10-05 23:43 | mods/productionPlanner, plugins/IFZ-productionPlanner-v0.4.0.dll | 0.4.0 | Phase 3: foreman role. Expert can be made foreman (loses the Expert level, learns the role in 3/8/15 shifts); building-wide boost +10/25/50 %; title shown; Stop foreman. Replaces v0.3.0 DLL. |
+| 2026-10-05 23:43 | mods/productionPlanner/SPEC.md | 1.5.0 | Phase 3 marked built; build notes. |
+| 2026-10-05 23:43 | mods/productionPlanner/README.md | 1.3.0 | Foreman limits; 25 tests. |
+| 2026-10-05 23:43 | Explained-game_infectionFreeZone.md | 1.5.0 | Patch owner note for foreman boost. |
+| 2026-10-05 23:43 | README.md | 1.4.0 | Foreman features. |
+| 2026-10-05 23:43 | plugins/README.md | 1.4.0 | DLL renamed to v0.4.0. |
+| 2026-10-05 23:43 | FEATURES_AND_VERSIONS.md | 1.7.0 | Recorded the changes above. |
 | 2026-10-05 21:57 | mods/productionPlanner, plugins/IFZ-productionPlanner-v0.3.0.dll | 0.3.0 | Phase 2: job experience per building type (Novice/Moderate/Expert = +10/25/50 % after 3/8/15 shifts), 3-job limit with forget, experience limit per building, auto-pick of experienced workers, experience in worker window and planner. Replaces v0.2.0 DLL. |
 | 2026-10-05 21:57 | mods/productionPlanner/SPEC.md | 1.4.0 | Phase 2 marked built; build notes. |
 | 2026-10-05 21:57 | mods/productionPlanner/README.md | 1.2.0 | New files, limits, test record. |
