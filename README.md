@@ -1,6 +1,6 @@
 # IFZ Compilation — Infection Free Zone mods
 
-> **File version:** 1.1.0 · **Last edit:** 2026-10-04 10:26 UTC
+> **File version:** 1.2.0 · **Last edit:** 2026-10-05 19:48 UTC
 
 A set of BepInEx mods for **Infection Free Zone** that are built to work together.
 Each mod is a separate DLL, so you install only what you want.
@@ -46,7 +46,7 @@ See the [install guide](docs/INSTALL.md).
 
 | Mod | Version | Type | Summary |
 |-----|---------|------|---------|
-| [Production Planner](#productionplanner--v010) | 0.1.0 | Function | Set a daily output goal for a building and get the number of workers it needs. |
+| [Production Planner](#productionplanner--v020) | 0.2.0 | Function | Daily output goals, 9 work priorities, building on/off, and named workers locked to buildings. |
 
 <!--
 Copy this block for each mod. Keep the heading = the mod name.
@@ -65,10 +65,10 @@ Short one-line description.
 </details>
 -->
 
-### productionPlanner — v0.1.0
+### productionPlanner — v0.2.0
 
 Set a daily production goal on a building. The mod works out how many workers the building needs and tells you, or sets the max workers for you.
-File: [`IFZ-productionPlanner-v0.1.0.dll`](plugins/IFZ-productionPlanner-v0.1.0.dll) · Hotkey: **F6** · Status: first test build.
+File: [`IFZ-productionPlanner-v0.2.0.dll`](plugins/IFZ-productionPlanner-v0.2.0.dll) · Hotkey: **F6** · Status: test build.
 
 <details>
 <summary><b>Planner window</b> — a floating box that follows the building you select</summary>
@@ -76,6 +76,27 @@ File: [`IFZ-productionPlanner-v0.1.0.dll`](plugins/IFZ-productionPlanner-v0.1.0.
 - Press **F6** to open or close it. Drag it by its title.
 - It shows the building whose info panel is open. Select another building and the box changes.
 - Works for every building with a production (cookhouse, workshops, factories and similar).
+
+</details>
+
+<details>
+<summary><b>Priorities and on/off</b> — 9 priority levels and a turn-off button for every staffed building</summary>
+
+- Priority buttons 1–9 in the planner window (the game's own panel shows only 1–5). Higher = filled first.
+- **Turn off** removes all workers and clears the building's locks. **Turn on** restores the old priority.
+- Works for every building with permanent workers: production, towers and defences, research, crematorium, child care and similar. Not houses.
+
+</details>
+
+<details>
+<summary><b>Named workers and locks</b> — keep the same people on the same job</summary>
+
+- **Workers…** opens a separate window. Move it by its title, resize it from the bottom-right corner.
+- Left: all available workers (name, gender, age, current job). Sort by name, gender or job; search by name.
+- **→** assigns and locks a worker to this building. **←** unlocks them. **▲ / ▼** set the order.
+- **Lock current workers** locks everyone working there now. **Unlock all** frees them.
+- Unlocked workers come and go as normal. A locked worker works only this job. They leave the list only if the building is turned off, they die, they are drafted into a squad or the army, or max workers drops below their place on the list (the bottom of the list goes first).
+- Sick workers keep their place and show **In hospital**. They return when they are well.
 
 </details>
 
