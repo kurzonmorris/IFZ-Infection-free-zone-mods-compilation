@@ -11,7 +11,7 @@ namespace IFZ.ProductionPlanner
 {
     internal static class WorkerWindow
     {
-        private enum SortMode { Name, Gender, Job }
+        private enum SortMode { Experience, Name, Gender, Job }
 
         private const float MinWidth = 520f;
         private const float MinHeight = 300f;
@@ -23,9 +23,11 @@ namespace IFZ.ProductionPlanner
         private static bool _resizing;
         private static Vector2 _leftScroll;
         private static Vector2 _rightScroll;
-        private static SortMode _sort = SortMode.Name;
+        private static SortMode _sort = SortMode.Experience;
         private static bool _descending;
         private static string _filter = "";
+        private static Character _details;
+        private static string _job;
 
         public static void Show(Structure structure)
         {
@@ -99,6 +101,7 @@ namespace IFZ.ProductionPlanner
                 return;
             }
 
+            _job = Experience.JobId(_structure);
             var lockList = Crews.LockList(_structure);
             GUILayout.Label($"Working: {work.Workers.Count} · Max workers: {work.MaxWorkers} · Slots: {work.InitialMaxWorkers} · Locked: {lockList.Count}");
 
@@ -109,17 +112,16 @@ namespace IFZ.ProductionPlanner
 
             GUILayout.BeginHorizontal();
             GUILayout.Label("Sort:", GUILayout.Width(36f));
+            SortButton("Experience", SortMode.Experience);
             SortButton("Name", SortMode.Name);
             SortButton("Gender", SortMode.Gender);
             SortButton("Job", SortMode.Job);
-            GUI.enabled = false;
-            GUILayout.Button("Experience (phase 2)");
-            GUI.enabled = true;
             GUILayout.Label("Find:", GUILayout.Width(34f));
             _filter = GUILayout.TextField(_filter, 20, GUILayout.Width(100f));
             GUILayout.EndHorizontal();
 
             float columnWidth = (_rect.width - 40f) / 2f;
+            if (_details != null) DrawDetails();
             GUILayout.BeginHorizontal();
 
             GUILayout.BeginVertical(GUILayout.Width(columnWidth));
@@ -129,6 +131,7 @@ namespace IFZ.ProductionPlanner
             {
                 GUILayout.BeginHorizontal();
                 bool lockedElsewhere = Crews.IsLocked(c);
+                if (GUILayout.Button("i", GUILayout.Width(20f))) _details = c;
                 GUILayout.Label(Row(c, lockedElsewhere));
                 GUI.enabled = !lockedElsewhere && lockList.Count < work.InitialMaxWorkers;
                 if (GUILayout.Button("→", GUILayout.Width(28f))) Crews.Lock(_structure, work, c);
@@ -153,6 +156,7 @@ namespace IFZ.ProductionPlanner
                     GUILayout.EndHorizontal();
                     break;
                 }
+                if (c != null && GUILayout.Button("i", GUILayout.Width(20f))) _details = c;
                 GUILayout.Label($"{i + 1}. " + (c != null ? Row(c, false) : "(missing)"));
                 if (GUILayout.Button("▲", GUILayout.Width(24f))) Crews.Move(_structure, i, -1);
                 if (GUILayout.Button("▼", GUILayout.Width(24f))) Crews.Move(_structure, i, 1);
@@ -184,6 +188,31 @@ namespace IFZ.ProductionPlanner
             GUILayout.EndArea();
         }
 
+        private static void DrawDetails()
+        {
+            GUILayout.BeginVertical("box");
+            GUILayout.BeginHorizontal();
+            GUILayout.Label($"<b>{_details.Name}</b> — jobs (max {Experience.MaxJobs}; learning a new one forgets the oldest)");
+            if (GUILayout.Button("x", GUILayout.Width(22f))) _details = null;
+            GUILayout.EndHorizontal();
+            if (_details == null)
+            {
+                GUILayout.EndVertical();
+                return;
+            }
+            var jobs = Experience.Jobs(_details);
+            if (jobs.Count == 0) GUILayout.Label("No job experience yet.");
+            foreach (var j in new List<JobExperience>(jobs))
+            {
+                GUILayout.BeginHorizontal();
+                string state = j.Learned ? Experience.LevelNames[(int)Experience.LevelFor(j.Days)] : "learning";
+                GUILayout.Label($"{Experience.JobName(j.Job)}: {state} ({j.Days:0.0} of {Experience.ExpertDays:0} days)");
+                if (GUILayout.Button("Forget", GUILayout.Width(60f))) Experience.Forget(_details, j.Job);
+                GUILayout.EndHorizontal();
+            }
+            GUILayout.EndVertical();
+        }
+
         private static void SortButton(string label, SortMode mode)
         {
             string text = _sort == mode ? label + (_descending ? " ▼" : " ▲") : label;
@@ -210,6 +239,9 @@ namespace IFZ.ProductionPlanner
             Comparison<Character> compare;
             switch (_sort)
             {
+                case SortMode.Experience:
+                    compare = (a, b) => Experience.Days(b, _job).CompareTo(Experience.Days(a, _job)) is int x && x != 0 ? x : string.CompareOrdinal(a.Name, b.Name);
+                    break;
                 case SortMode.Gender:
                     compare = (a, b) => string.CompareOrdinal(Gender(a), Gender(b)) is int g && g != 0 ? g : string.CompareOrdinal(a.Name, b.Name);
                     break;
@@ -239,7 +271,9 @@ namespace IFZ.ProductionPlanner
 
         private static string Row(Character c, bool lockedElsewhere)
         {
-            string row = $"{c.Name} · {Gender(c)} · {c.CharacterInfo.Age} · {JobLabel(c)}";
+            float days = Experience.Days(c, _job);
+            string exp = days > 0f ? $"{Experience.LevelNames[(int)Experience.LevelFor(days)]} {days:0.0}d" : "no exp";
+            string row = $"{c.Name} · {Gender(c)} · {c.CharacterInfo.Age} · {exp} · {JobLabel(c)}";
             if (lockedElsewhere) row = "<color=grey>" + row + " · locked</color>";
             return row;
         }

@@ -17,6 +17,7 @@ namespace IFZ.ProductionPlanner
         public bool UseWeather;
         public bool UseWorkHours;
         public bool UseHauling;
+        public bool UseExperience;
         public float HaulingPercent;
     }
 
@@ -25,9 +26,10 @@ namespace IFZ.ProductionPlanner
     {
         public const string Guid = "kurzon.ifz.productionPlanner";
         public const string Name = "IFZ Production Planner";
-        public const string Version = "0.2.0";
+        public const string Version = "0.3.0";
 
         internal static ManualLogSource Log;
+        internal static bool ExperienceEnabled = true;
 
         private ConfigEntry<bool> _enabled;
         private ConfigEntry<KeyboardShortcut> _toggleKey;
@@ -37,6 +39,9 @@ namespace IFZ.ProductionPlanner
         private ConfigEntry<bool> _useHauling;
         private ConfigEntry<float> _haulingPercent;
         private ConfigEntry<float> _autoInterval;
+        private ConfigEntry<bool> _experience;
+        private ConfigEntry<bool> _autoPick;
+        private ConfigEntry<bool> _useExperience;
 
         private bool _show;
         private Rect _window = new Rect(80f, 120f, 380f, 10f);
@@ -58,6 +63,9 @@ namespace IFZ.ProductionPlanner
             _useHauling = Config.Bind("Factors", "UseHauling", true, "Include an allowance for time workers spend carrying resources.");
             _haulingPercent = Config.Bind("Factors", "HaulingPercent", 20f, new ConfigDescription("Percent of work time lost to carrying resources. An estimate; tune it against 'Produced today'.", new AcceptableValueRange<float>(0f, 90f)));
             _autoInterval = Config.Bind("Auto", "RecheckSeconds", 5f, new ConfigDescription("Seconds between automatic worker adjustments.", new AcceptableValueRange<float>(1f, 120f)));
+            _experience = Config.Bind("Experience", "Enabled", true, "Workers gain job experience and work faster: Novice +10 %, Moderate +25 %, Expert +50 %.");
+            _autoPick = Config.Bind("Experience", "AutoPickExperienced", true, "Move the most experienced free or unlocked worker into a job when they beat a current worker there.");
+            _useExperience = Config.Bind("Factors", "UseExperience", true, "Include the experience boost of the building's current workers.");
             _harmony = new Harmony(Guid);
             Patches.Apply(_harmony);
             Logger.LogInfo($"{Name} v{Version} loaded.");
@@ -69,7 +77,8 @@ namespace IFZ.ProductionPlanner
             UseWeather = _useWeather.Value,
             UseWorkHours = _useWorkHours.Value,
             UseHauling = _useHauling.Value,
-            HaulingPercent = _haulingPercent.Value
+            HaulingPercent = _haulingPercent.Value,
+            UseExperience = _useExperience.Value && _experience.Value
         };
 
         private void Update()
@@ -81,6 +90,9 @@ namespace IFZ.ProductionPlanner
                 if (Time.unscaledTime >= _nextCrewCheck)
                 {
                     _nextCrewCheck = Time.unscaledTime + 2f;
+                    ExperienceEnabled = _experience.Value;
+                    Crews.AutoPick = _experience.Value && _autoPick.Value;
+                    if (ExperienceEnabled) Experience.Accrue();
                     Crews.Maintain();
                 }
                 if (Time.unscaledTime >= _nextAuto)
@@ -110,11 +122,17 @@ namespace IFZ.ProductionPlanner
                 var plan = Planner.Calculate(work, goal.PerDay, settings);
                 if (plan == null || plan.RequiredWorkers <= 0) continue;
                 int target = Mathf.Clamp(plan.RequiredWorkers, 1, work.InitialMaxWorkers);
-                if (work.MaxWorkers != target) work.MaxWorkers = target;
+                if (Crews.WantedMax(building, work) != target) Crews.SetWantedMax(building, work, target);
             }
         }
 
-        private void OnDestroy() => _harmony?.UnpatchSelf();
+        private void OnDestroy()
+        {
+            Experience.Save();
+            _harmony?.UnpatchSelf();
+        }
+
+        private void OnApplicationQuit() => Experience.Save();
 
         private void OnGUI()
         {
@@ -222,6 +240,7 @@ namespace IFZ.ProductionPlanner
             _useWorkHours.Value = GUILayout.Toggle(_useWorkHours.Value, $" Work hours ({plan.WorkHoursPerDay:0.#} h/day)");
             _useMood.Value = GUILayout.Toggle(_useMood.Value, $" Mood ({plan.MoodFactor * 100f:0}%{(plan.MoodFromWorkers || !_useMood.Value ? "" : ", no workers yet")})");
             _useWeather.Value = GUILayout.Toggle(_useWeather.Value, $" Weather ({plan.WeatherFactor * 100f:0}%)");
+            if (_experience.Value) _useExperience.Value = GUILayout.Toggle(_useExperience.Value, $" Experience ({plan.ExperienceFactor * 100f:0}%)");
             GUILayout.BeginHorizontal();
             _useHauling.Value = GUILayout.Toggle(_useHauling.Value, $" Hauling allowance {_haulingPercent.Value:0}%");
             if (GUILayout.Button("-", GUILayout.Width(24f))) _haulingPercent.Value = Mathf.Max(0f, _haulingPercent.Value - 5f);
@@ -247,9 +266,9 @@ namespace IFZ.ProductionPlanner
                     GUILayout.Label($"<color=orange>Daily cap of this building: {plan.MaxDayProduction}. Needs about {plan.VolumeForDailyCap:0} m³ for the goal.</color>");
                 if (tooFewSlots || overCap)
                     GUILayout.Label($"This building can reach about {plan.ReachablePerDay:0.#}/day.");
-                if (!tooFewSlots && !goal.Auto && plan.RequiredWorkers != plan.CurrentMax)
+                if (!tooFewSlots && !goal.Auto && plan.RequiredWorkers != Crews.WantedMax(structure, work))
                 {
-                    if (GUILayout.Button($"Set max workers to {plan.RequiredWorkers}")) work.MaxWorkers = plan.RequiredWorkers;
+                    if (GUILayout.Button($"Set max workers to {plan.RequiredWorkers}")) Crews.SetWantedMax(structure, work, plan.RequiredWorkers);
                 }
                 if (goal.Auto) GUILayout.Label($"Auto: max workers set to {Mathf.Clamp(plan.RequiredWorkers, 1, plan.SlotLimit)} every {_autoInterval.Value:0} s.");
             }
@@ -306,10 +325,38 @@ namespace IFZ.ProductionPlanner
             }
             if (staff.Priority > Crews.MaxPriority)
                 GUILayout.Label($"Priority {staff.Priority} (alarm boost).");
+            bool restricted = Crews.IsRestricted(structure);
+            int wanted = Crews.WantedMax(structure, staff);
             GUILayout.BeginHorizontal();
-            GUILayout.Label($"Workers {staff.Workers.Count}/{staff.MaxWorkers} (slots {staff.InitialMaxWorkers}) · locked {Crews.LockList(structure).Count}");
+            GUILayout.Label($"Workers {staff.Workers.Count}/{wanted} (slots {staff.InitialMaxWorkers}) · locked {Crews.LockList(structure).Count}");
+            if (restricted)
+            {
+                if (GUILayout.Button("-", GUILayout.Width(24f))) Crews.SetWantedMax(structure, staff, wanted - 1);
+                if (GUILayout.Button("+", GUILayout.Width(24f))) Crews.SetWantedMax(structure, staff, wanted + 1);
+            }
             if (GUILayout.Button("Workers…", GUILayout.Width(80f))) WorkerWindow.Show(structure);
             GUILayout.EndHorizontal();
+            if (!_experience.Value) return;
+            string job = Experience.JobId(structure);
+            var counts = new int[4];
+            foreach (var w in staff.Workers)
+            {
+                if (w != null) counts[(int)Experience.LevelOf(w, job)]++;
+            }
+            GUILayout.Label($"Experience here: Expert {counts[3]} · Moderate {counts[2]} · Novice {counts[1]} · None {counts[0]}");
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Experience limit:", GUILayout.Width(110f));
+            var min = Crews.MinLevel(structure);
+            for (int i = 0; i < 4; i++)
+            {
+                var old = GUI.color;
+                if ((int)min == i) GUI.color = Color.green;
+                if (GUILayout.Button(i == 0 ? "Any" : Experience.LevelNames[i]) && (int)min != i) Crews.SetMinLevel(structure, staff, (Level)i);
+                GUI.color = old;
+            }
+            GUILayout.EndHorizontal();
+            if (restricted)
+                GUILayout.Label($"<size=11>Limit on: the mod fills this building itself. Use - / + here for max workers (wanted {wanted}).</size>");
         }
 
         private void Footer()

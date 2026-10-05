@@ -1,6 +1,6 @@
 # productionPlanner — feature spec (workforce expansion)
 
-> **File version:** 1.3.0 · **Last edit:** 2026-10-05 19:48 UTC
+> **File version:** 1.4.0 · **Last edit:** 2026-10-05 21:57 UTC
 >
 > Kurzon's requests of 2026-10-04 and 2026-10-05, with a feasibility check
 > against the decompiled game (`Ifz.dll`, 2026-09-18). Status per feature:
@@ -72,6 +72,10 @@
 - Boost method: scale the worker's work time in
   `WorkModule.ExecuteWork(timeSinceLastTick)` (same lever as MiKanSei39's
   work-speed mod). Applies to production, research and other `Work` types.
+- Built rule (0.3.0): only one new job is in training at a time; a learned
+  job is forgotten only when the new one reaches Novice. With a limit on, the
+  mod sets the game's max workers itself (silent write to `_maxWorkers`) so
+  the game never adds unqualified workers.
 - Data saved by the mod per save game (the game has no work experience; its
   `KnowledgeActivity` covers only Shooting, Melee, Scavenging, Driving).
 
@@ -201,7 +205,7 @@
 | Phase | Content | Status |
 |-------|---------|--------|
 | 1 | §1 priorities and Off · §2 lock · §3 worker window | built in 0.2.0, testing |
-| 2 | §4 job experience | ready |
+| 2 | §4 job experience | built in 0.3.0, testing |
 | 3 | §5 foreman | ready |
 | 4 | §6 houses | ready |
 | 5 | §8 squad skills and Marksman | after Q7a, Q8a |

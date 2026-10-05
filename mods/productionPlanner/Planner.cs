@@ -33,6 +33,7 @@ namespace IFZ.ProductionPlanner
         public float MoodFactor;
         public bool MoodFromWorkers;
         public float WeatherFactor;
+        public float ExperienceFactor;
         public float HaulingFactor;
         public float PerWorkerPerDay;
         public int RequiredWorkers;
@@ -110,7 +111,7 @@ namespace IFZ.ProductionPlanner
             return _context.Container?.TryResolve<T>();
         }
 
-        public static float WorkHoursPerDay(ProductionWork work)
+        public static float WorkHoursPerDay(Work work)
         {
             var config = WorkersConfigField?.GetValue(work) as WorkersConfig;
             var laws = LawsField?.GetValue(work) as LawsController;
@@ -140,6 +141,21 @@ namespace IFZ.ProductionPlanner
             return sum / count;
         }
 
+        public static float ExperienceFactor(ProductionWork work)
+        {
+            var workers = work.Workers;
+            if (workers == null || workers.Count == 0) return 1f;
+            float sum = 0f;
+            int count = 0;
+            foreach (Character worker in workers)
+            {
+                if (worker == null) continue;
+                sum += 1f + Experience.BoostFor(worker);
+                count++;
+            }
+            return count == 0 ? 1f : sum / count;
+        }
+
         public static PlanResult Calculate(ProductionWork work, float goalPerDay, Settings settings)
         {
             var data = work.ProductionData;
@@ -156,9 +172,10 @@ namespace IFZ.ProductionPlanner
             result.WorkHoursPerDay = settings.UseWorkHours ? WorkHoursPerDay(work) : 24f;
             result.MoodFactor = settings.UseMood ? MoodFactor(work, out result.MoodFromWorkers) : 1f;
             result.WeatherFactor = settings.UseWeather ? Mathf.Max(0f, work.GetCurrentTemperatureEfficiency()) : 1f;
+            result.ExperienceFactor = settings.UseExperience ? ExperienceFactor(work) : 1f;
             result.HaulingFactor = settings.UseHauling ? Mathf.Clamp01(1f - settings.HaulingPercent / 100f) : 1f;
 
-            float producingGtsPerWorker = result.WorkHoursPerDay * hourGts * result.MoodFactor * result.WeatherFactor * result.HaulingFactor;
+            float producingGtsPerWorker = result.WorkHoursPerDay * hourGts * result.MoodFactor * result.WeatherFactor * result.ExperienceFactor * result.HaulingFactor;
             result.PerWorkerPerDay = producingGtsPerWorker / cycleGts * result.OutputPerCycle;
             result.RequiredWorkers = result.PerWorkerPerDay > 0f && goalPerDay > 0f
                 ? Mathf.CeilToInt(goalPerDay / result.PerWorkerPerDay)

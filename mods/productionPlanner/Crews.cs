@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Reflection;
 using BepInEx;
 using Controllers.CharacterLogic;
 using Gameplay.Rebuilding;
@@ -136,77 +137,292 @@ namespace IFZ.ProductionPlanner
             Changed();
         }
 
+        private sealed class Limit
+        {
+            public int MinLevel;
+            public int Desired;
+            public int LastSet;
+        }
+
+        private static readonly Dictionary<string, Limit> Limits = new Dictionary<string, Limit>();
+        private static readonly FieldInfo MaxWorkersField = typeof(WorkBase).GetField("_maxWorkers", BindingFlags.Instance | BindingFlags.NonPublic);
+        private const int MovesPerCheck = 3;
+        private static int _moves;
+
+        public static bool AutoPick = true;
+
+        public static Level MinLevel(Structure structure)
+        {
+            Load();
+            return Limits.TryGetValue(Key(structure), out var limit) ? (Level)limit.MinLevel : Level.None;
+        }
+
+        public static bool IsRestricted(Structure structure) => MinLevel(structure) != Level.None;
+
+        public static int WantedMax(Structure structure, WorkBase work)
+        {
+            Load();
+            return Limits.TryGetValue(Key(structure), out var limit) ? limit.Desired : work.MaxWorkers;
+        }
+
+        public static void SetMinLevel(Structure structure, WorkBase work, Level level)
+        {
+            Load();
+            string key = Key(structure);
+            if (level == Level.None)
+            {
+                if (Limits.TryGetValue(key, out var old))
+                {
+                    Limits.Remove(key);
+                    work.MaxWorkers = Math.Min(old.Desired, work.InitialMaxWorkers);
+                }
+            }
+            else if (Limits.TryGetValue(key, out var limit))
+            {
+                limit.MinLevel = (int)level;
+            }
+            else
+            {
+                Limits[key] = new Limit { MinLevel = (int)level, Desired = work.MaxWorkers, LastSet = work.MaxWorkers };
+            }
+            Changed();
+        }
+
+        public static void SetWantedMax(Structure structure, WorkBase work, int max)
+        {
+            Load();
+            max = Math.Max(0, Math.Min(max, work.InitialMaxWorkers));
+            if (Limits.TryGetValue(Key(structure), out var limit))
+            {
+                limit.Desired = max;
+                Changed();
+            }
+            else if (work.MaxWorkers != max)
+            {
+                work.MaxWorkers = max;
+            }
+        }
+
+        private static void SetMaxSilently(WorkBase work, int max)
+        {
+            if (MaxWorkersField != null) MaxWorkersField.SetValue(work, Math.Max(0, max));
+        }
+
         public static void Maintain()
         {
             Load();
+            _moves = 0;
             string save = GoalStore.SaveId() + "|";
             var works = Planner.Resolve<WorkController>()?.Works;
             var workersController = Planner.Resolve<WorkersController>();
             var citizens = Planner.Resolve<CitizensController>();
             if (works == null || workersController?.Workers == null || citizens?.Citizens == null) return;
 
-            var byKey = new Dictionary<string, KeyValuePair<Structure, WorkBase>>();
+            var buildings = new List<KeyValuePair<Structure, WorkBase>>();
+            var liveKeys = new HashSet<string>();
             foreach (var work in works)
             {
                 var structure = work?.GetRelatedStructure();
                 if (structure == null || StaffWork(structure) != work) continue;
-                byKey[Key(structure)] = new KeyValuePair<Structure, WorkBase>(structure, work);
+                buildings.Add(new KeyValuePair<Structure, WorkBase>(structure, work));
+                liveKeys.Add(Key(structure));
             }
             var byId = new Dictionary<string, Character>();
             foreach (var citizen in citizens.Citizens)
             {
                 if (citizen != null && !string.IsNullOrEmpty(citizen.Id)) byId[citizen.Id] = citizen;
             }
-            var available = new HashSet<Character>(workersController.Workers);
+            var pool = new List<Character>(workersController.Workers);
+            var available = new HashSet<Character>(pool);
 
             bool changed = false;
             foreach (var key in new List<string>(Locks.Keys))
             {
-                if (!key.StartsWith(save, StringComparison.Ordinal)) continue;
-                var list = Locks[key];
-                if (!byKey.TryGetValue(key, out var pair) || IsOff(pair.Value))
+                if (key.StartsWith(save, StringComparison.Ordinal) && !liveKeys.Contains(key))
                 {
                     Locks.Remove(key);
                     changed = true;
-                    continue;
                 }
-                var work = pair.Value;
-                while (list.Count > work.MaxWorkers)
+            }
+            foreach (var key in new List<string>(Limits.Keys))
+            {
+                if (key.StartsWith(save, StringComparison.Ordinal) && !liveKeys.Contains(key))
                 {
-                    list.RemoveAt(list.Count - 1);
+                    Limits.Remove(key);
                     changed = true;
                 }
-                for (int i = list.Count - 1; i >= 0; i--)
+            }
+
+            foreach (var pair in buildings)
+            {
+                var structure = pair.Key;
+                var work = pair.Value;
+                string key = Key(structure);
+                if (IsOff(work))
                 {
-                    if (!byId.TryGetValue(list[i], out var c) || c.IsUnderSquadProduction || c.IsSoldier || (!c.IsSick && !available.Contains(c)))
+                    if (Locks.Remove(key)) changed = true;
+                    continue;
+                }
+                Limits.TryGetValue(key, out var limit);
+                if (limit != null)
+                {
+                    if (work.MaxWorkers != limit.LastSet)
                     {
-                        list.RemoveAt(i);
+                        limit.Desired = Math.Max(0, Math.Min(work.InitialMaxWorkers, limit.Desired + work.MaxWorkers - limit.LastSet));
                         changed = true;
                     }
+                    SetMaxSilently(work, limit.Desired);
                 }
-                foreach (string id in list)
+
+                Locks.TryGetValue(key, out var list);
+                if (list != null) changed |= KeepLocked(work, list, byId, available);
+
+                try
                 {
-                    var c = byId[id];
-                    if (c.IsSick || c.WorkModule.CurrentWork == work) continue;
-                    if (work.Workers.Count >= work.MaxWorkers) EvictUnlocked(work, list);
-                    if (work.Workers.Count >= work.MaxWorkers) continue;
-                    try
-                    {
-                        c.WorkModule.UnassignWork(true);
-                        work.AddWorker(c);
-                    }
-                    catch (Exception e)
-                    {
-                        Plugin.Log.LogWarning($"Could not return {c.Name} to their job: {e.Message}");
-                    }
+                    if (limit != null) ManageRestricted(structure, work, limit, list, pool);
+                    else if (AutoPick) PickExperienced(structure, work, list, pool);
                 }
-                if (list.Count == 0)
+                catch (Exception e)
+                {
+                    Plugin.Log.LogWarning($"Worker management failed for {Planner.BuildingName(structure)}: {e.Message}");
+                }
+
+                if (limit != null)
+                {
+                    limit.LastSet = work.Workers.Count;
+                    SetMaxSilently(work, limit.LastSet);
+                }
+                if (list != null && list.Count == 0)
                 {
                     Locks.Remove(key);
                     changed = true;
                 }
             }
             if (changed) Changed();
+        }
+
+        private static bool KeepLocked(WorkBase work, List<string> list, Dictionary<string, Character> byId, HashSet<Character> available)
+        {
+            bool changed = false;
+            while (list.Count > work.MaxWorkers)
+            {
+                list.RemoveAt(list.Count - 1);
+                changed = true;
+            }
+            for (int i = list.Count - 1; i >= 0; i--)
+            {
+                if (!byId.TryGetValue(list[i], out var c) || c.IsUnderSquadProduction || c.IsSoldier || (!c.IsSick && !available.Contains(c)))
+                {
+                    list.RemoveAt(i);
+                    changed = true;
+                }
+            }
+            foreach (string id in list)
+            {
+                var c = byId[id];
+                if (c.IsSick || c.WorkModule.CurrentWork == work) continue;
+                if (work.Workers.Count >= work.MaxWorkers) EvictUnlocked(work, list);
+                if (work.Workers.Count >= work.MaxWorkers) continue;
+                try
+                {
+                    c.WorkModule.UnassignWork(true);
+                    if (c.WorkModule.CurrentWork != work) work.AddWorker(c);
+                }
+                catch (Exception e)
+                {
+                    Plugin.Log.LogWarning($"Could not return {c.Name} to their job: {e.Message}");
+                }
+            }
+            return changed;
+        }
+
+        private static void ManageRestricted(Structure structure, WorkBase work, Limit limit, List<string> locks, List<Character> pool)
+        {
+            string job = Experience.JobId(structure);
+            var min = (Level)limit.MinLevel;
+            foreach (var w in new List<Character>(work.Workers))
+            {
+                if (w == null || (locks != null && locks.Contains(w.Id))) continue;
+                if (Experience.LevelOf(w, job) < min) w.WorkModule.UnassignWork(true);
+            }
+            while (work.Workers.Count < limit.Desired && _moves < MovesPerCheck)
+            {
+                var recruit = BestCandidate(job, min, work, Level.None, pool);
+                if (recruit == null) break;
+                Recruit(work, recruit);
+            }
+        }
+
+        private static void PickExperienced(Structure structure, WorkBase work, List<string> locks, List<Character> pool)
+        {
+            if (_moves >= MovesPerCheck || work.MaxWorkers <= 0) return;
+            string job = Experience.JobId(structure);
+            if (work.Workers.Count < work.MaxWorkers)
+            {
+                var recruit = BestCandidate(job, Level.Novice, work, Level.None, pool);
+                if (recruit != null) Recruit(work, recruit);
+                return;
+            }
+            Character weakest = null;
+            var weakestLevel = Level.Expert;
+            foreach (var w in work.Workers)
+            {
+                if (w == null || (locks != null && locks.Contains(w.Id))) continue;
+                var level = Experience.LevelOf(w, job);
+                if (weakest == null || level < weakestLevel)
+                {
+                    weakest = w;
+                    weakestLevel = level;
+                }
+            }
+            if (weakest == null || weakestLevel == Level.Expert) return;
+            var better = BestCandidate(job, Level.Novice, work, weakestLevel, pool);
+            if (better == null) return;
+            int max = work.MaxWorkers;
+            Recruit(work, better);
+            if (better.WorkModule.CurrentWork != work) return;
+            SetMaxSilently(work, max);
+            weakest.WorkModule.UnassignWork(true);
+        }
+
+        private static void Recruit(WorkBase work, Character recruit)
+        {
+            _moves++;
+            int max = work.MaxWorkers;
+            if (work.Workers.Count >= max) SetMaxSilently(work, work.Workers.Count + 1);
+            recruit.WorkModule.UnassignWork(true);
+            if (recruit.WorkModule.CurrentWork != work) work.AddWorker(recruit);
+            if (work.MaxWorkers > max && work.Workers.Count <= max) SetMaxSilently(work, max);
+        }
+
+        private static Character BestCandidate(string job, Level minLevel, WorkBase target, Level mustBeat, List<Character> pool)
+        {
+            Character best = null;
+            Level bestLevel = Level.None;
+            bool bestFree = false;
+            float bestDays = 0f;
+            foreach (var c in pool)
+            {
+                if (c == null || c.IsSick || c.IsUnderSquadProduction || IsLocked(c)) continue;
+                var current = c.WorkModule.CurrentWork;
+                if (current == target) continue;
+                float days = Experience.Days(c, job);
+                var level = Experience.LevelFor(days);
+                if (level < minLevel || level <= mustBeat) continue;
+                string currentJob = Experience.CurrentJob(c);
+                if (currentJob != null && currentJob != job && Experience.LevelOf(c, currentJob) >= level) continue;
+                bool free = current == null || c.WorkModule.HasParentWork;
+                bool better = best == null
+                    || level > bestLevel
+                    || (level == bestLevel && free && !bestFree)
+                    || (level == bestLevel && free == bestFree && days > bestDays);
+                if (!better) continue;
+                best = c;
+                bestLevel = level;
+                bestFree = free;
+                bestDays = days;
+            }
+            return best;
         }
 
         private static void EvictUnlocked(WorkBase work, List<string> list)
@@ -263,6 +479,10 @@ namespace IFZ.ProductionPlanner
                 {
                     if (pair.Value.Count > 0) lines.Add("L\t" + pair.Key + "\t" + string.Join(",", pair.Value.ToArray()));
                 }
+                foreach (var pair in Limits)
+                {
+                    lines.Add("M\t" + pair.Key + "\t" + pair.Value.MinLevel + "\t" + pair.Value.Desired + "\t" + pair.Value.LastSet);
+                }
                 foreach (var pair in PriorityBeforeOff)
                 {
                     lines.Add("O\t" + pair.Key + "\t" + pair.Value.ToString(CultureInfo.InvariantCulture));
@@ -288,6 +508,11 @@ namespace IFZ.ProductionPlanner
                     if (parts.Length < 3) continue;
                     if (parts[0] == "L")
                         Locks[parts[1]] = new List<string>(parts[2].Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries));
+                    else if (parts[0] == "M" && parts.Length >= 5
+                        && int.TryParse(parts[2], NumberStyles.Integer, CultureInfo.InvariantCulture, out int min)
+                        && int.TryParse(parts[3], NumberStyles.Integer, CultureInfo.InvariantCulture, out int desired)
+                        && int.TryParse(parts[4], NumberStyles.Integer, CultureInfo.InvariantCulture, out int last))
+                        Limits[parts[1]] = new Limit { MinLevel = min, Desired = desired, LastSet = last };
                     else if (parts[0] == "O" && int.TryParse(parts[2], NumberStyles.Integer, CultureInfo.InvariantCulture, out int p))
                         PriorityBeforeOff[parts[1]] = p;
                 }

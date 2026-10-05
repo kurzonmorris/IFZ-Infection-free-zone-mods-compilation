@@ -1,6 +1,6 @@
 # Infection Free Zone — Modding Reference
 
-> **File version:** 1.3.0 · **Last edit:** 2026-10-05 19:48 UTC
+> **File version:** 1.4.0 · **Last edit:** 2026-10-05 21:57 UTC
 >
 > **Purpose:** Read this file before you work on any mod in this repository. It
 > holds every fact we found about the game, the tools, and our own project
@@ -579,6 +579,12 @@ Names are from `Ifz.dll`. Source tag in brackets. ❓ = not checked by us.
   first (`CanBeAssignedToWork`).
 - `WorkModule.UnassignWork` also calls `Character.FindBestHouse()`: changing
   job can change house.
+- ⚠️ `WorksPriorityManager.FindWork` returns true even if `AddWorker` then
+  refuses the worker; `WorkController.AddAvailableWorker` then never adds the
+  worker to the free list. **Never make `AddWorker` refuse a worker** — the
+  worker gets lost. To keep people out, make the work look full instead
+  (write `WorkBase._maxWorkers` directly; the setter fires
+  `OnMaxWorkerChange` and the game assigns the closest free worker at once).
 - Sick: `SicknessController` unassigns the worker and calls
   `WorkersController.RemoveWorker` — the sick person stays in
   `CitizensController.Citizens` but leaves `WorkersController.Workers`.
@@ -634,7 +640,8 @@ Names are from `Ifz.dll`. Source tag in brackets. ❓ = not checked by us.
 |-------------|-----------|------|
 | `WorksPriorityManager` constructor (postfix) | productionPlanner | Resizes priority groups 11 → 15 (priorities 1–9, alarm +5) |
 | `PriorityWorkGroup.TryGetClosestWorker` (postfix) | productionPlanner | Skips locked workers |
-| `WorkBase.GetClosestWorker` (postfix) | productionPlanner | Prefers unlocked workers |
+| `WorkBase.GetClosestWorker` (postfix) | productionPlanner | Picks the unlocked, least experienced worker to move |
+| `WorkModule.ExecuteWork(float)` (prefix) | productionPlanner | Scales work time by job experience (+10/25/50 %) |
 
 ---
 
