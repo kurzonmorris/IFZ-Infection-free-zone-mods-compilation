@@ -26,7 +26,7 @@ namespace IFZ.ProductionPlanner
     {
         public const string Guid = "kurzon.ifz.productionPlanner";
         public const string Name = "IFZ Production Planner";
-        public const string Version = "0.3.0";
+        public const string Version = "0.4.0";
 
         internal static ManualLogSource Log;
         internal static bool ExperienceEnabled = true;
@@ -344,6 +344,10 @@ namespace IFZ.ProductionPlanner
                 if (w != null) counts[(int)Experience.LevelOf(w, job)]++;
             }
             GUILayout.Label($"Experience here: Expert {counts[3]} · Moderate {counts[2]} · Novice {counts[1]} · None {counts[0]}");
+            if (Experience.TryGetForeman(staff, out var foreman, out var foremanLevel))
+                GUILayout.Label($"Foreman: {foreman.Name} — {Experience.Title(foreman)} (+{Experience.Boost(foremanLevel) * 100f:0} % to the building)");
+            else
+                GUILayout.Label("<size=11>No foreman. An Expert can be made foreman in the worker window (i).</size>");
             GUILayout.BeginHorizontal();
             GUILayout.Label("Experience limit:", GUILayout.Width(110f));
             var min = Crews.MinLevel(structure);

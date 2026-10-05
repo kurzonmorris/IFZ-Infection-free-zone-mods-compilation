@@ -1,6 +1,6 @@
 # IFZ Compilation — Infection Free Zone mods
 
-> **File version:** 1.3.0 · **Last edit:** 2026-10-05 21:57 UTC
+> **File version:** 1.4.0 · **Last edit:** 2026-10-05 23:43 UTC
 
 A set of BepInEx mods for **Infection Free Zone** that are built to work together.
 Each mod is a separate DLL, so you install only what you want.
@@ -46,7 +46,7 @@ See the [install guide](docs/INSTALL.md).
 
 | Mod | Version | Type | Summary |
 |-----|---------|------|---------|
-| [Production Planner](#productionplanner--v030) | 0.3.0 | Function | Daily output goals, 9 work priorities, building on/off, named workers locked to jobs, and job experience. |
+| [Production Planner](#productionplanner--v040) | 0.4.0 | Function | Daily output goals, 9 work priorities, building on/off, named workers locked to jobs, job experience and foremen. |
 
 <!--
 Copy this block for each mod. Keep the heading = the mod name.
@@ -65,10 +65,10 @@ Short one-line description.
 </details>
 -->
 
-### productionPlanner — v0.3.0
+### productionPlanner — v0.4.0
 
 Set a daily production goal on a building. The mod works out how many workers the building needs and tells you, or sets the max workers for you.
-File: [`IFZ-productionPlanner-v0.3.0.dll`](plugins/IFZ-productionPlanner-v0.3.0.dll) · Hotkey: **F6** · Status: test build.
+File: [`IFZ-productionPlanner-v0.4.0.dll`](plugins/IFZ-productionPlanner-v0.4.0.dll) · Hotkey: **F6** · Status: test build.
 
 <details>
 <summary><b>Planner window</b> — a floating box that follows the building you select</summary>
@@ -117,6 +117,17 @@ File: [`IFZ-productionPlanner-v0.3.0.dll`](plugins/IFZ-productionPlanner-v0.3.0.
 - **Experience limit** per building (Any / Novice / Moderate / Expert): only qualified workers are taken on. Locked workers stay even if the limit rises. With a limit on, the mod fills the building itself; set its max workers with − / + in the planner window.
 - **Auto-pick:** when a more experienced worker exists, the mod moves them into the job in place of a less experienced unlocked worker. Free workers and scavengers go first. Turn it off with `Experience / AutoPickExperienced`.
 - The planner's worker calculation includes the experience of the current workers (tick box **Experience**).
+
+</details>
+
+<details>
+<summary><b>Foremen</b> — an Expert can lead their building</summary>
+
+- In the worker window, press **i** on a worker, then **Make foreman** next to a job they are Expert in.
+- The worker loses that Expert level and starts learning the foreman role: Novice after 3 days, Moderate after 8, Expert after 15 (30 days in all from no experience).
+- The foreman boosts **every worker in the building** they work in: +10 % / +25 % / +50 % by foreman level. The foreman gets no personal boost.
+- One foreman counts per building (the most experienced one). Title example: **Expert Foreman of the Cookhouse**.
+- **Stop foreman** removes the role (its progress is lost). Foremen are kept in place by auto-pick and count as Expert for experience limits.
 
 </details>
 

@@ -192,7 +192,8 @@ namespace IFZ.ProductionPlanner
         {
             GUILayout.BeginVertical("box");
             GUILayout.BeginHorizontal();
-            GUILayout.Label($"<b>{_details.Name}</b> — jobs (max {Experience.MaxJobs}; learning a new one forgets the oldest)");
+            string title = Experience.Title(_details);
+            GUILayout.Label($"<b>{_details.Name}</b>{(title != null ? " — " + title : "")} — jobs (max {Experience.MaxJobs}; learning a new one forgets the oldest)");
             if (GUILayout.Button("x", GUILayout.Width(22f))) _details = null;
             GUILayout.EndHorizontal();
             if (_details == null)
@@ -205,9 +206,18 @@ namespace IFZ.ProductionPlanner
             foreach (var j in new List<JobExperience>(jobs))
             {
                 GUILayout.BeginHorizontal();
-                string state = j.Learned ? Experience.LevelNames[(int)Experience.LevelFor(j.Days)] : "learning";
+                bool foreman = ExperienceRules.IsForemanEntry(j.Job);
+                var level = Experience.LevelFor(j.Days);
+                string state = foreman || j.Learned ? Experience.LevelNames[(int)level] : "learning";
                 GUILayout.Label($"{Experience.JobName(j.Job)}: {state} ({j.Days:0.0} of {Experience.ExpertDays:0} days)");
-                if (GUILayout.Button("Forget", GUILayout.Width(60f))) Experience.Forget(_details, j.Job);
+                if (!foreman && level == Level.Expert && Experience.ForemanOf(_details) == null
+                    && GUILayout.Button("Make foreman", GUILayout.Width(100f)))
+                    Experience.MakeForeman(_details, j.Job);
+                if (foreman)
+                {
+                    if (GUILayout.Button("Stop foreman", GUILayout.Width(100f))) Experience.StopForeman(_details);
+                }
+                else if (GUILayout.Button("Forget", GUILayout.Width(60f))) Experience.Forget(_details, j.Job);
                 GUILayout.EndHorizontal();
             }
             GUILayout.EndVertical();
@@ -273,6 +283,7 @@ namespace IFZ.ProductionPlanner
         {
             float days = Experience.Days(c, _job);
             string exp = days > 0f ? $"{Experience.LevelNames[(int)Experience.LevelFor(days)]} {days:0.0}d" : "no exp";
+            if (Experience.ForemanOf(c) == _job) exp = Experience.Title(c);
             string row = $"{c.Name} · {Gender(c)} · {c.CharacterInfo.Age} · {exp} · {JobLabel(c)}";
             if (lockedElsewhere) row = "<color=grey>" + row + " · locked</color>";
             return row;
