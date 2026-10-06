@@ -103,11 +103,33 @@ namespace IFZ.ProductionPlanner
         }
     }
 
+    [HarmonyPatch(typeof(Gameplay.Rebuilding.Structure), nameof(Gameplay.Rebuilding.Structure.HasSpaceForCitizen))]
+    internal static class HouseOffPatch
+    {
+        private static void Postfix(Gameplay.Rebuilding.Structure __instance, ref bool __result)
+        {
+            if (__result && Houses.IsOff(__instance)) __result = false;
+        }
+    }
+
+    [HarmonyPatch(typeof(Character), nameof(Character.FindBestHouse))]
+    internal static class LockedHousePatch
+    {
+        private static bool Prefix(Character __instance)
+        {
+            var house = Houses.LockedHouse(__instance);
+            if (house == null || Houses.IsOff(house)) return true;
+            if (__instance.HouseData.House as Gameplay.Rebuilding.Structure != house)
+                __instance.HouseData.House = house as Gameplay.Core.EnterableSystem.IEnterable;
+            return false;
+        }
+    }
+
     internal static class Patches
     {
         public static void Apply(Harmony harmony)
         {
-            foreach (var type in new[] { typeof(PriorityGroupsPatch), typeof(SkipLockedCandidatePatch), typeof(PreferUnlockedWorkerPatch), typeof(ExperienceBoostPatch) })
+            foreach (var type in new[] { typeof(PriorityGroupsPatch), typeof(SkipLockedCandidatePatch), typeof(PreferUnlockedWorkerPatch), typeof(ExperienceBoostPatch), typeof(HouseOffPatch), typeof(LockedHousePatch) })
             {
                 try
                 {

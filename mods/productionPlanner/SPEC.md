@@ -1,6 +1,6 @@
 # productionPlanner — feature spec (workforce expansion)
 
-> **File version:** 1.5.0 · **Last edit:** 2026-10-05 23:43 UTC
+> **File version:** 1.6.0 · **Last edit:** 2026-10-06 00:05 UTC
 >
 > Kurzon's requests of 2026-10-04 and 2026-10-05, with a feasibility check
 > against the decompiled game (`Ifz.dll`, 2026-09-18). Status per feature:
@@ -211,7 +211,7 @@
 | 1 | §1 priorities and Off · §2 lock · §3 worker window | built in 0.2.0, testing |
 | 2 | §4 job experience | built in 0.3.0, testing |
 | 3 | §5 foreman | built in 0.4.0, testing |
-| 4 | §6 houses | ready |
+| 4 | §6 houses | built in 0.5.0, testing |
 | 5 | §8 squad skills and Marksman | after Q7a, Q8a |
 | 6 | §10 night shift | after Q10–Q12 |
 | 7 | §9 house guards | needs research |
