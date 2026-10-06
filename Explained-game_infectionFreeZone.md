@@ -1,6 +1,6 @@
 # Infection Free Zone — Modding Reference
 
-> **File version:** 1.8.0 · **Last edit:** 2026-10-06 11:30 UTC
+> **File version:** 1.9.0 · **Last edit:** 2026-10-06 11:35 UTC
 >
 > **Purpose:** Read this file before you work on any mod in this repository. It
 > holds every fact we found about the game, the tools, and our own project
@@ -278,7 +278,11 @@ These rules keep our mods from fighting each other or other people's mods.
 9. **Keep `Awake` light.** Resolve reflection lazily on first use, not in
    `Awake`. Reflection at load time was linked to a BepInEx load stall.
    (JaySNL, MassDeconstruct)
-10. **Gate in-game code:** run gameplay code only when a game is loaded, for
+10. **Window toggle hook:** every mod with a window gives its plugin class a
+    public `ToggleWindow()` method (static or instance, no arguments). The Mod
+    Menu calls it directly. Name the window's key setting with a word like
+    "Toggle" or "Window" so the Mod Menu finds it.
+11. **Gate in-game code:** run gameplay code only when a game is loaded, for
     example when `HqController.MainHeadquarter != null`. (JaySNL)
 
 ---
@@ -670,6 +674,7 @@ Names are from `Ifz.dll`. Source tag in brackets. ❓ = not checked by us.
 | `CharacterFightHandler.GetDamage` (postfix) | productionPlanner | Marksman / combat-skill damage |
 | `CharacterFightHandler.GetWeaponAttackReach` (postfix) | productionPlanner | Marksman / combat-skill range (also patched by JaySNL HighGround) |
 | `CharacterFightHandler.ResetAttackCooldown` (postfix) | productionPlanner | Fire rate; counts Marksman shooting time |
+| `UnityEngine.Input.GetKeyDown(KeyCode)` / `GetKey(KeyCode)` (postfix) | modMenu | Fakes a key for one frame to open another mod's window |
 | `Character.Kill` (prefix) | productionPlanner | Records sickness deaths for guarded houses |
 | `SicknessController.KillAndTurn` / `SetCriticalSick` (prefix) | productionPlanner | Resets the guard turn count |
 | `SicknessController.SpawnHorde` (prefix) | productionPlanner | Scales turned horde size for guarded houses |

@@ -1,25 +1,20 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ModName>productionPlanner</ModName>
-    <Version>0.7.1</Version>
+    <ModName>modMenu</ModName>
+    <Version>0.1.0</Version>
     <AssemblyName>IFZ-$(ModName)-v$(Version)</AssemblyName>
-    <RootNamespace>IFZ.ProductionPlanner</RootNamespace>
+    <RootNamespace>IFZ.ModMenu</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
     <Reference Include="BepInEx"><HintPath>$(IFZGameDir)/BepInEx/core/BepInEx.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="0Harmony"><HintPath>$(IFZGameDir)/BepInEx/core/0Harmony.dll</HintPath><Private>false</Private></Reference>
-    <Reference Include="CharacterNameGenerator"><HintPath>$(IFZManaged)/CharacterNameGenerator.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="Ifz"><HintPath>$(IFZManaged)/Ifz.dll</HintPath><Private>false</Private></Reference>
-    <Reference Include="Laungage"><HintPath>$(IFZManaged)/Laungage.dll</HintPath><Private>false</Private></Reference>
-    <Reference Include="JutsuGamesConfig"><HintPath>$(IFZManaged)/JutsuGamesConfig.dll</HintPath><Private>false</Private></Reference>
-    <Reference Include="Zenject"><HintPath>$(IFZManaged)/Zenject.dll</HintPath><Private>false</Private></Reference>
-    <Reference Include="Sirenix.Serialization"><HintPath>$(IFZManaged)/Sirenix.Serialization.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="UnityEngine"><HintPath>$(IFZManaged)/UnityEngine.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="UnityEngine.CoreModule"><HintPath>$(IFZManaged)/UnityEngine.CoreModule.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="UnityEngine.IMGUIModule"><HintPath>$(IFZManaged)/UnityEngine.IMGUIModule.dll</HintPath><Private>false</Private></Reference>
-    <Reference Include="UnityEngine.TextRenderingModule"><HintPath>$(IFZManaged)/UnityEngine.TextRenderingModule.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="UnityEngine.InputLegacyModule"><HintPath>$(IFZManaged)/UnityEngine.InputLegacyModule.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine.TextRenderingModule"><HintPath>$(IFZManaged)/UnityEngine.TextRenderingModule.dll</HintPath><Private>false</Private></Reference>
   </ItemGroup>
 
   <Target Name="DeployMod" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'">

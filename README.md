@@ -1,6 +1,6 @@
 # IFZ Compilation — Infection Free Zone mods
 
-> **File version:** 1.7.0 · **Last edit:** 2026-10-06 11:30 UTC
+> **File version:** 1.8.0 · **Last edit:** 2026-10-06 11:35 UTC
 
 A set of BepInEx mods for **Infection Free Zone** that are built to work together.
 Each mod is a separate DLL, so you install only what you want.
@@ -46,7 +46,8 @@ See the [install guide](docs/INSTALL.md).
 
 | Mod | Version | Type | Summary |
 |-----|---------|------|---------|
-| [Production Planner](#productionplanner--v070) | 0.7.0 | Function | Daily output goals, 9 work priorities, building and house on/off, named workers locked to jobs and houses, job experience, foremen, squad skill levels, Marksman and house guards. |
+| [Production Planner](#productionplanner--v071) | 0.7.1 | Function | Daily output goals, 9 work priorities, building and house on/off, named workers locked to jobs and houses, job experience, foremen, squad skill levels, Marksman and house guards. |
+| [Mod Menu](#modmenu--v010) | 0.1.0 | Function | A Mods button in the bottom-right corner that lists and opens every mod window. |
 
 <!--
 Copy this block for each mod. Keep the heading = the mod name.
@@ -65,10 +66,10 @@ Short one-line description.
 </details>
 -->
 
-### productionPlanner — v0.7.0
+### productionPlanner — v0.7.1
 
 Set a daily production goal on a building. The mod works out how many workers the building needs and tells you, or sets the max workers for you.
-File: [`IFZ-productionPlanner-v0.7.0.dll`](plugins/IFZ-productionPlanner-v0.7.0.dll) · Hotkey: **F6** · Status: test build.
+File: [`IFZ-productionPlanner-v0.7.1.dll`](plugins/IFZ-productionPlanner-v0.7.1.dll) · Hotkey: **F6** · Status: test build.
 
 <details>
 <summary><b>Planner window</b> — a floating box that follows the building you select</summary>
@@ -208,6 +209,21 @@ File: [`IFZ-productionPlanner-v0.7.0.dll`](plugins/IFZ-productionPlanner-v0.7.0.
 - Warns when the goal is above the building's daily production cap.
 - Lists each input per day (for example meat or vegetables) with stock and days left.
 - Shows what the building produced today, so you can compare it with the plan.
+
+</details>
+
+### modMenu — v0.1.0
+
+A small **Mods** button in the bottom-right corner of the screen, like a start menu for mod windows.
+File: [`IFZ-modMenu-v0.1.0.dll`](plugins/IFZ-modMenu-v0.1.0.dll) · No hotkey · Status: test build.
+
+<details>
+<summary><b>Mods button</b> — one click to every mod window</summary>
+
+- Click **Mods** to open the list; click an entry to open that mod's window. The list includes the Production Planner (F6).
+- The list builds itself: it finds window keys in the settings of every installed BepInEx mod (keys whose name or description mentions toggle, window, menu, open, show, panel…). New mods appear automatically.
+- Add mods whose keys are not in their settings with `Menu / ExtraEntries` (for example `Mod Panels=F7`).
+- Move the button with `Button / OffsetX` and `OffsetY`.
 
 </details>
 

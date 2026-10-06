@@ -1,8 +1,10 @@
 # productionPlanner
 
-> **File version:** 1.6.0 · **Last edit:** 2026-10-06 11:30 UTC
+> **File version:** 1.7.0 · **Last edit:** 2026-10-06 11:35 UTC
 
-Mod version **0.7.0** · DLL `IFZ-productionPlanner-v0.7.0.dll` · GUID `kurzon.ifz.productionPlanner` · Hotkey **F6**
+Mod version **0.7.1** · DLL `IFZ-productionPlanner-v0.7.1.dll` · GUID `kurzon.ifz.productionPlanner` · Hotkey **F6**
+
+`Plugin.ToggleWindow()` (public static) opens/closes the F6 window; the Mod Menu uses it.
 
 Source files:
 - `Plugin.cs` — config, F6 window (IMGUI), Auto loop.
@@ -31,7 +33,7 @@ workers needed     = ceil(goal ÷ per worker per day)
 Limits: `InitialMaxWorkers` (slots from building volume) and `MaxDayProduction` (daily cap from volume).
 Game facts behind this: `Explained-game_infectionFreeZone.md` §9.5a–§9.5c.
 
-## Not handled in 0.7.0
+## Not handled in 0.7.1
 
 - Buildings without a `ProductionWork` (for example farms, sawmill, forester, gather works) show "not supported".
 - Rest and fatigue are not modelled separately. The hauling allowance covers them.
