@@ -144,6 +144,15 @@ namespace IFZ.ProductionPlanner
             LastShot[shooter] = now;
         }
 
+        public static void AddMarksmanHours(Character c, float hours)
+        {
+            if (c == null || hours <= 0f) return;
+            Load();
+            string key = Key(c);
+            MarksmanHours[key] = Hours(MarksmanHours, key) + hours;
+            _dirty = true;
+        }
+
         private static bool IsActiveOutside(Group squad)
         {
             if (squad.IsOnExpedition()) return true;

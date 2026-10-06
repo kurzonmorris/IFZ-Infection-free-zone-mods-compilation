@@ -26,7 +26,7 @@ namespace IFZ.ProductionPlanner
     {
         public const string Guid = "kurzon.ifz.productionPlanner";
         public const string Name = "IFZ Production Planner";
-        public const string Version = "0.6.0";
+        public const string Version = "0.7.0";
 
         internal static ManualLogSource Log;
         internal static bool ExperienceEnabled = true;
@@ -44,6 +44,8 @@ namespace IFZ.ProductionPlanner
         private ConfigEntry<bool> _autoPick;
         private ConfigEntry<bool> _useExperience;
         private ConfigEntry<bool> _combat;
+        private static ConfigEntry<float> _opacity;
+        private ConfigEntry<bool> _guards;
 
         private bool _show;
         private Rect _window = new Rect(80f, 120f, 380f, 10f);
@@ -69,6 +71,11 @@ namespace IFZ.ProductionPlanner
             _autoPick = Config.Bind("Experience", "AutoPickExperienced", true, "Move the most experienced free or unlocked worker into a job when they beat a current worker there.");
             _useExperience = Config.Bind("Factors", "UseExperience", true, "Include the experience boost of the building's current workers.");
             _combat = Config.Bind("Combat", "Enabled", true, "Squad skill levels and Marksman experience for guards.");
+            _opacity = Config.Bind("Window", "Opacity", 0.95f, new ConfigDescription("Background opacity of the mod's windows. Also set with the slider in each window's title bar.", new AcceptableValueRange<float>(0.3f, 1f)));
+            UiStyle.Opacity = _opacity.Value;
+            _guards = Config.Bind("Guards", "Enabled", true, "House guards: fewer residents turn, guards clear turned infected inside and shoot infected near the house.");
+            Guards.KillsPerGuardHour = Config.Bind("Guards", "KillsPerGuardHour", 1f, "Infected killed per guard per game hour inside the house.").Value;
+            Guards.ShootRadius = Config.Bind("Guards", "ShootRadius", 35f, "Metres around the house in which guards shoot infected (also limited by the weapon's reach).").Value;
             _harmony = new Harmony(Guid);
             Patches.Apply(_harmony);
             Logger.LogInfo($"{Name} v{Version} loaded.");
@@ -100,6 +107,7 @@ namespace IFZ.ProductionPlanner
                     if (CombatEnabled) Combat.Tick();
                     Crews.Maintain();
                     Houses.Maintain();
+                    if (_guards.Value) Guards.Tick();
                 }
                 if (Time.unscaledTime >= _nextAuto)
                 {
@@ -150,7 +158,7 @@ namespace IFZ.ProductionPlanner
             if (!_enabled.Value) return;
             try
             {
-                if (_show) _window = GUILayout.Window(_windowId, _window, DrawWindow, $"Production Planner v{Version}");
+                if (_show) _window = GUILayout.Window(_windowId, _window, DrawWindow, $"Production Planner v{Version}", UiStyle.Window);
                 WorkerWindow.OnGUI();
                 HouseWindow.OnGUI();
             }
@@ -161,8 +169,14 @@ namespace IFZ.ProductionPlanner
             }
         }
 
+        internal static void OpacityChanged(float value)
+        {
+            if (_opacity != null) _opacity.Value = value;
+        }
+
         private void DrawWindow(int id)
         {
+            UiStyle.OpacitySlider(_window.width);
             var structure = Planner.SelectedStructure();
             if (structure != _shownStructure)
             {
@@ -360,6 +374,14 @@ namespace IFZ.ProductionPlanner
             GUI.enabled = true;
             GUILayout.EndHorizontal();
             if (off) GUILayout.Label("<color=orange>Turned off: nobody lives here, locks cleared.</color>");
+            else if (_guards.Value)
+            {
+                int guards = Guards.GuardList(house).Count;
+                int max = Guards.MaxGuards(house);
+                GUILayout.Label(guards >= max
+                    ? $"Guards {guards}/{max} — fully guarded: residents turn 50 % less often."
+                    : $"Guards {guards}/{max}. Add guards in the Residents window.");
+            }
         }
 
         private void DrawStaff(Structure structure)

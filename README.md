@@ -1,6 +1,6 @@
 # IFZ Compilation — Infection Free Zone mods
 
-> **File version:** 1.6.0 · **Last edit:** 2026-10-06 08:14 UTC
+> **File version:** 1.7.0 · **Last edit:** 2026-10-06 11:30 UTC
 
 A set of BepInEx mods for **Infection Free Zone** that are built to work together.
 Each mod is a separate DLL, so you install only what you want.
@@ -46,7 +46,7 @@ See the [install guide](docs/INSTALL.md).
 
 | Mod | Version | Type | Summary |
 |-----|---------|------|---------|
-| [Production Planner](#productionplanner--v060) | 0.6.0 | Function | Daily output goals, 9 work priorities, building and house on/off, named workers locked to jobs and houses, job experience, foremen, squad skill levels and Marksman. |
+| [Production Planner](#productionplanner--v070) | 0.7.0 | Function | Daily output goals, 9 work priorities, building and house on/off, named workers locked to jobs and houses, job experience, foremen, squad skill levels, Marksman and house guards. |
 
 <!--
 Copy this block for each mod. Keep the heading = the mod name.
@@ -65,15 +65,16 @@ Short one-line description.
 </details>
 -->
 
-### productionPlanner — v0.6.0
+### productionPlanner — v0.7.0
 
 Set a daily production goal on a building. The mod works out how many workers the building needs and tells you, or sets the max workers for you.
-File: [`IFZ-productionPlanner-v0.6.0.dll`](plugins/IFZ-productionPlanner-v0.6.0.dll) · Hotkey: **F6** · Status: test build.
+File: [`IFZ-productionPlanner-v0.7.0.dll`](plugins/IFZ-productionPlanner-v0.7.0.dll) · Hotkey: **F6** · Status: test build.
 
 <details>
 <summary><b>Planner window</b> — a floating box that follows the building you select</summary>
 
 - Press **F6** to open or close it. Drag it by its title.
+- Every window has an **Opacity** slider in its title bar (30–100 %, remembered).
 - It shows the building whose info panel is open. Select another building and the box changes.
 - Works for every building with a production (cookhouse, workshops, factories and similar).
 
@@ -158,6 +159,18 @@ File: [`IFZ-productionPlanner-v0.6.0.dll`](plugins/IFZ-productionPlanner-v0.6.0.
 - **Marksman:** tower, gate and bunker guards earn it in real fights: Novice after 6 hours of shooting, Moderate after 15 more, Expert after 40 more (in-game hours). Shooting-range practice does not count.
 - Select a squad and press **F6** to see each member's skills, levels and shifts. A guard's Marksman level shows under **i** in the worker window.
 - Turn it all off with `Combat / Enabled`.
+
+</details>
+
+<details>
+<summary><b>House guards</b> — keep the peace and protect residents</summary>
+
+- In the **Residents** window, press **Guard** next to a worker. They are locked into the house as a guard. Up to 1 guard per 25 living spaces (at least 1).
+- A house with a full guard list: its residents are **50 % less likely to turn** when they die of sickness.
+- Turned infected inside a guarded house are cleared by the guards (1 per guard per game hour). Guards are not hurt.
+- Guards inside the house shoot infected within 35 m (pistol stats, ammo from your stock, Marksman bonuses apply). Guard fighting earns Marksman hours.
+- Guards keep their day job and guard while they are at home.
+- Settings: `Guards / Enabled`, `KillsPerGuardHour`, `ShootRadius`.
 
 </details>
 

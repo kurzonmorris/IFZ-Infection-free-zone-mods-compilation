@@ -39,7 +39,7 @@ namespace IFZ.ProductionPlanner
         {
             if (!Open) return;
             HandleResize();
-            _rect = GUI.Window(WindowId, _rect, Draw, "Workers");
+            _rect = GUI.Window(WindowId, _rect, Draw, "Workers", UiStyle.Window);
         }
 
         private static void HandleResize()
@@ -75,6 +75,7 @@ namespace IFZ.ProductionPlanner
                 Open = false;
             }
             GUI.Box(new Rect(_rect.width - 18f, _rect.height - 18f, 18f, 18f), "◢");
+            UiStyle.OpacitySlider(_rect.width);
             GUI.DragWindow(new Rect(0f, 0f, _rect.width - 30f, 20f));
         }
 

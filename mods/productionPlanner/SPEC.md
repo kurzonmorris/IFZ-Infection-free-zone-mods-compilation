@@ -1,6 +1,6 @@
 # productionPlanner — feature spec (workforce expansion)
 
-> **File version:** 1.7.0 · **Last edit:** 2026-10-06 08:14 UTC
+> **File version:** 1.8.0 · **Last edit:** 2026-10-06 11:30 UTC
 >
 > Kurzon's requests of 2026-10-04 and 2026-10-05, with a feasibility check
 > against the decompiled game (`Ifz.dll`, 2026-09-18). Status per feature:
@@ -132,6 +132,29 @@
 - **Hard part:** units inside a house do not fight in the game. Shooting from
   houses and "slowly kill" need custom logic.
 
+### 9a. Built design (0.7.0)
+
+- A guard is a named resident (worker, not child or soldier), locked into
+  the house. Max guards = ceil(capacity / 25), at least 1.
+- **Guards keep their day job.** They guard while they are inside the house
+  (evenings, nights, rest). A full-time guard job needs a new work type in
+  the game's job system (research, like warehouse staff).
+- Turning: the game kills critical sick citizens, then spawns
+  round(chance × deaths) fresh infected in a random house, shelter, medbay or
+  hospital. The mod weighs each sickness death: 0.5 if the dead person lived
+  in a fully guarded house, else 1, and scales the horde size by the average
+  weight. (Patches: `Character.Kill` prefix, `SicknessController.KillAndTurn`
+  / `SetCriticalSick` prefixes, `SpawnHorde` prefix.)
+- Clearing: an infected group inside a guarded house loses 1 infected per
+  guard inside per game hour (`Guards / KillsPerGuardHour`). Guards are never
+  hurt by this.
+- Shooting: each guard inside fires at the nearest infected outside within
+  35 m (`Guards / ShootRadius`, capped by weapon reach) with pistol stats and
+  Marksman bonuses, using ammo from the stockpile. Shots have no visible
+  tracer. Only infected (the game's `GroupsController`) are targeted; raiders
+  are not yet.
+- Guard time in these fights adds Marksman hours.
+
 ## 10. Night shift  🟡
 
 - When there are more people than jobs, buildings get a second shift. Night
@@ -229,7 +252,7 @@
 | 4 | §6 houses | built in 0.5.0, testing |
 | 5 | §8 squad skills and Marksman | built in 0.6.0, testing |
 | 6 | §10 night shift | ready |
-| 7 | §9 house guards | needs research |
+| 7 | §9 house guards | built in 0.7.0, testing |
 | 8 | §7 warehouse staff | needs research |
 
 Each phase ships as a new productionPlanner version for in-game testing.
