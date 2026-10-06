@@ -1,6 +1,6 @@
 # Infection Free Zone — Modding Reference
 
-> **File version:** 1.5.0 · **Last edit:** 2026-10-05 23:43 UTC
+> **File version:** 1.6.0 · **Last edit:** 2026-10-06 00:05 UTC
 >
 > **Purpose:** Read this file before you work on any mod in this repository. It
 > holds every fact we found about the game, the tools, and our own project
@@ -596,6 +596,12 @@ Names are from `Ifz.dll`. Source tag in brackets. ❓ = not checked by us.
   `Shooting`, `MeleeAttack`, `Scavenging`, `Driving`; `SkillId`: Slasher,
   Strong, HawkEye, SharpShooter, RaceDriver, EconomicDriver, Shoplifter,
   Inspector.
+- House facts: a house = `Draft.HasLivingQuartersModule && Draft.HousePriority > 0`;
+  `Structure.GetCitizensCapacity()` (virtual), `LivingCitizens`,
+  `HasSpaceForCitizen()` (HQ always true), `FindNewHousesForCitizens(n)`.
+  `Character.HouseData.House` setter calls `RemoveCharacterFromHouse` /
+  `AssignBuildingAsHouse`. The game moves people out by setting the house to
+  `HqController.MainHeadquarter` and calling `FindBestHouse()`.
 - Houses: `HouseAssigner` → `HouseRequest` sorts houses by distance from the
   citizen's **current position**, takes the first with
   `HasSpaceForCitizen()`. `Character.HouseData.House`.
@@ -641,6 +647,8 @@ Names are from `Ifz.dll`. Source tag in brackets. ❓ = not checked by us.
 | `WorksPriorityManager` constructor (postfix) | productionPlanner | Resizes priority groups 11 → 15 (priorities 1–9, alarm +5) |
 | `PriorityWorkGroup.TryGetClosestWorker` (postfix) | productionPlanner | Skips locked workers |
 | `WorkBase.GetClosestWorker` (postfix) | productionPlanner | Picks the unlocked, least experienced worker to move |
+| `Structure.HasSpaceForCitizen` (postfix) | productionPlanner | False for houses turned off |
+| `Character.FindBestHouse` (prefix) | productionPlanner | Keeps locked citizens in their house |
 | `WorkModule.ExecuteWork(float)` (prefix) | productionPlanner | Scales work time by job experience (+10/25/50 %) × foreman boost of the building |
 
 ---

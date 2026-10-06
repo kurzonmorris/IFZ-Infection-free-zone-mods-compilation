@@ -26,7 +26,7 @@ namespace IFZ.ProductionPlanner
     {
         public const string Guid = "kurzon.ifz.productionPlanner";
         public const string Name = "IFZ Production Planner";
-        public const string Version = "0.4.0";
+        public const string Version = "0.5.0";
 
         internal static ManualLogSource Log;
         internal static bool ExperienceEnabled = true;
@@ -94,6 +94,7 @@ namespace IFZ.ProductionPlanner
                     Crews.AutoPick = _experience.Value && _autoPick.Value;
                     if (ExperienceEnabled) Experience.Accrue();
                     Crews.Maintain();
+                    Houses.Maintain();
                 }
                 if (Time.unscaledTime >= _nextAuto)
                 {
@@ -141,6 +142,7 @@ namespace IFZ.ProductionPlanner
             {
                 if (_show) _window = GUILayout.Window(_windowId, _window, DrawWindow, $"Production Planner v{Version}");
                 WorkerWindow.OnGUI();
+                HouseWindow.OnGUI();
             }
             catch (Exception e)
             {
@@ -167,6 +169,12 @@ namespace IFZ.ProductionPlanner
             }
 
             GUILayout.Label("<b>" + Planner.BuildingName(structure) + "</b>");
+            if (Houses.IsHouse(structure))
+            {
+                DrawHouse(structure);
+                Footer();
+                return;
+            }
             DrawStaff(structure);
             if (!(structure.CurrentWork is ProductionWork work) || work.ProductionData == null)
             {
@@ -290,6 +298,24 @@ namespace IFZ.ProductionPlanner
                 ? $"Produced today: {plan.ProducedToday}"
                 : $"Produced since tracking began today: {plan.ProducedToday} (full count from tomorrow)");
             Footer();
+        }
+
+        private void DrawHouse(Structure house)
+        {
+            Houses.Remember(house);
+            bool off = Houses.IsOff(house);
+            GUILayout.BeginHorizontal();
+            GUILayout.Label($"Residents {house.LivingCitizens.Count}/{house.GetCitizensCapacity()} · locked {Houses.LockList(house).Count}");
+            if (GUILayout.Button(off ? "Turn on" : "Turn off", GUILayout.Width(70f)))
+            {
+                if (off) Houses.TurnOn(house);
+                else Houses.TurnOff(house);
+            }
+            GUI.enabled = !off;
+            if (GUILayout.Button("Residents…", GUILayout.Width(90f))) HouseWindow.Show(house);
+            GUI.enabled = true;
+            GUILayout.EndHorizontal();
+            if (off) GUILayout.Label("<color=orange>Turned off: nobody lives here, locks cleared.</color>");
         }
 
         private void DrawStaff(Structure structure)

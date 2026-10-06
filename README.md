@@ -1,6 +1,6 @@
 # IFZ Compilation — Infection Free Zone mods
 
-> **File version:** 1.4.0 · **Last edit:** 2026-10-05 23:43 UTC
+> **File version:** 1.5.0 · **Last edit:** 2026-10-06 00:05 UTC
 
 A set of BepInEx mods for **Infection Free Zone** that are built to work together.
 Each mod is a separate DLL, so you install only what you want.
@@ -46,7 +46,7 @@ See the [install guide](docs/INSTALL.md).
 
 | Mod | Version | Type | Summary |
 |-----|---------|------|---------|
-| [Production Planner](#productionplanner--v040) | 0.4.0 | Function | Daily output goals, 9 work priorities, building on/off, named workers locked to jobs, job experience and foremen. |
+| [Production Planner](#productionplanner--v050) | 0.5.0 | Function | Daily output goals, 9 work priorities, building and house on/off, named workers locked to jobs and houses, job experience and foremen. |
 
 <!--
 Copy this block for each mod. Keep the heading = the mod name.
@@ -65,10 +65,10 @@ Short one-line description.
 </details>
 -->
 
-### productionPlanner — v0.4.0
+### productionPlanner — v0.5.0
 
 Set a daily production goal on a building. The mod works out how many workers the building needs and tells you, or sets the max workers for you.
-File: [`IFZ-productionPlanner-v0.4.0.dll`](plugins/IFZ-productionPlanner-v0.4.0.dll) · Hotkey: **F6** · Status: test build.
+File: [`IFZ-productionPlanner-v0.5.0.dll`](plugins/IFZ-productionPlanner-v0.5.0.dll) · Hotkey: **F6** · Status: test build.
 
 <details>
 <summary><b>Planner window</b> — a floating box that follows the building you select</summary>
@@ -128,6 +128,17 @@ File: [`IFZ-productionPlanner-v0.4.0.dll`](plugins/IFZ-productionPlanner-v0.4.0.
 - The foreman boosts **every worker in the building** they work in: +10 % / +25 % / +50 % by foreman level. The foreman gets no personal boost.
 - One foreman counts per building (the most experienced one). Title example: **Expert Foreman of the Cookhouse**.
 - **Stop foreman** removes the role (its progress is lost). Foremen are kept in place by auto-pick and count as Expert for experience limits.
+
+</details>
+
+<details>
+<summary><b>Houses</b> — turn houses off and lock people into them</summary>
+
+- Select a house and press **F6**: residents, capacity and locked count.
+- **Turn off:** everyone moves out and nobody can move in. **Turn on** opens it again. The HQ cannot be turned off.
+- **Residents…** opens a separate, resizable window: all citizens on the left (name, gender, age, worker / child / soldier, current house), locked residents on the right. Sort by name, gender or house; search by name.
+- **→** moves a citizen in and locks them there (if the house is full, an unlocked resident moves out). **←** unlocks them. **Lock current residents** and **Unlock all** work on the whole house.
+- A locked citizen keeps that house when they change job. Unlocked citizens behave as normal.
 
 </details>
 

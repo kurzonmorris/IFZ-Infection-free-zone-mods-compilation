@@ -1,6 +1,6 @@
 # Features and versions
 
-> **File version:** 1.7.0 · **Last edit:** 2026-10-05 23:43 UTC
+> **File version:** 1.8.0 · **Last edit:** 2026-10-06 00:05 UTC
 
 Every edit, feature, and change to any file in this repository. Newest first.
 Rules: see `Explained-game_infectionFreeZone.md` §1.2 and §1.3.
@@ -9,27 +9,34 @@ Rules: see `Explained-game_infectionFreeZone.md` §1.2 and §1.3.
 
 | File | Version |
 |------|---------|
-| README.md | 1.4.0 |
-| FEATURES_AND_VERSIONS.md | 1.7.0 |
-| Explained-game_infectionFreeZone.md | 1.5.0 |
+| README.md | 1.5.0 |
+| FEATURES_AND_VERSIONS.md | 1.8.0 |
+| Explained-game_infectionFreeZone.md | 1.6.0 |
 | Explained-game_engineMap.md | 1.0.0 |
 | docs/INSTALL.md | 1.0.0 |
 | docs/HOTKEYS.md | 1.1.0 |
 | mods/_template (Plugin.cs, template.csproj, README.md) | 1.0.0 (template mod 0.1.0) |
 | mods/Directory.Build.props | 1.0.0 |
-| plugins/README.md | 1.4.0 |
+| plugins/README.md | 1.5.0 |
 | research/README.md | 1.2.0 |
 | .github/workflows/release.yml | 1.0.0 |
-| mods/productionPlanner (Plugin.cs, Planner.cs, GoalStore.cs, Crews.cs, Patches.cs, WorkerWindow.cs, Experience.cs, ExperienceRules.cs, productionPlanner.csproj) | 0.4.0 |
-| mods/productionPlanner/README.md | 1.3.0 |
-| mods/productionPlanner/SPEC.md | 1.5.0 |
-| plugins/IFZ-productionPlanner-v0.4.0.dll | 0.4.0 |
+| mods/productionPlanner (Plugin.cs, Planner.cs, GoalStore.cs, Crews.cs, Patches.cs, WorkerWindow.cs, Experience.cs, ExperienceRules.cs, Houses.cs, HouseWindow.cs, productionPlanner.csproj) | 0.5.0 |
+| mods/productionPlanner/README.md | 1.4.0 |
+| mods/productionPlanner/SPEC.md | 1.6.0 |
+| plugins/IFZ-productionPlanner-v0.5.0.dll | 0.5.0 |
 | Pack (Releases zip) | not released |
 
 ## Change log
 
 | Date and time (UTC) | File | Version | Change |
 |---------------------|------|---------|--------|
+| 2026-10-06 00:05 | mods/productionPlanner, plugins/IFZ-productionPlanner-v0.5.0.dll | 0.5.0 | Phase 4: houses. Turn a house off (all move out, nobody moves in); residents window to lock citizens into a house; locked citizens keep their house. Replaces v0.4.0 DLL. |
+| 2026-10-06 00:05 | mods/productionPlanner/SPEC.md | 1.6.0 | Phase 4 marked built. |
+| 2026-10-06 00:05 | mods/productionPlanner/README.md | 1.4.0 | House files and limits. |
+| 2026-10-06 00:05 | Explained-game_infectionFreeZone.md | 1.6.0 | House facts; new patch owners. |
+| 2026-10-06 00:05 | README.md | 1.5.0 | House features. |
+| 2026-10-06 00:05 | plugins/README.md | 1.5.0 | DLL renamed to v0.5.0. |
+| 2026-10-06 00:05 | FEATURES_AND_VERSIONS.md | 1.8.0 | Recorded the changes above. |
 | 2026-10-05 23:43 | mods/productionPlanner, plugins/IFZ-productionPlanner-v0.4.0.dll | 0.4.0 | Phase 3: foreman role. Expert can be made foreman (loses the Expert level, learns the role in 3/8/15 shifts); building-wide boost +10/25/50 %; title shown; Stop foreman. Replaces v0.3.0 DLL. |
 | 2026-10-05 23:43 | mods/productionPlanner/SPEC.md | 1.5.0 | Phase 3 marked built; build notes. |
 | 2026-10-05 23:43 | mods/productionPlanner/README.md | 1.3.0 | Foreman limits; 25 tests. |
