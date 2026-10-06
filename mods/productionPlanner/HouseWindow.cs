@@ -51,7 +51,7 @@ namespace IFZ.ProductionPlanner
             {
                 _resizing = false;
             }
-            _rect = GUI.Window(WindowId, _rect, Draw, "Residents");
+            _rect = GUI.Window(WindowId, _rect, Draw, "Residents", UiStyle.Window);
         }
 
         private static void Draw(int id)
@@ -66,6 +66,7 @@ namespace IFZ.ProductionPlanner
                 Open = false;
             }
             GUI.Box(new Rect(_rect.width - 18f, _rect.height - 18f, 18f, 18f), "◢");
+            UiStyle.OpacitySlider(_rect.width);
             GUI.DragWindow(new Rect(0f, 0f, _rect.width - 30f, 20f));
         }
 
@@ -95,6 +96,8 @@ namespace IFZ.ProductionPlanner
             var lockList = Houses.LockList(_house);
             GUILayout.Label($"Residents: {_house.LivingCitizens.Count}/{capacity} · Locked: {lockList.Count}");
 
+            DrawGuards(capacity);
+
             GUILayout.BeginHorizontal();
             if (GUILayout.Button("Lock current residents")) Houses.LockResidents(_house);
             if (GUILayout.Button("Unlock all")) Houses.UnlockAll(_house);
@@ -122,6 +125,8 @@ namespace IFZ.ProductionPlanner
                 GUILayout.Label(Row(c, lockedElsewhere));
                 GUI.enabled = !lockedElsewhere && lockList.Count < capacity;
                 if (GUILayout.Button("→", GUILayout.Width(28f))) Houses.Lock(_house, c);
+                GUI.enabled = !lockedElsewhere && !c.IsChild && !c.IsSoldier && Guards.GuardList(_house).Count < Guards.MaxGuards(_house);
+                if (GUILayout.Button("Guard", GUILayout.Width(52f))) Guards.MakeGuard(_house, c);
                 GUI.enabled = true;
                 GUILayout.EndHorizontal();
             }
@@ -138,6 +143,9 @@ namespace IFZ.ProductionPlanner
                 GUILayout.BeginHorizontal();
                 if (GUILayout.Button("←", GUILayout.Width(28f))) Houses.Unlock(_house, cid);
                 GUILayout.Label(c != null ? Row(c, false) : "(missing)");
+                GUI.enabled = c != null && !c.IsChild && !c.IsSoldier && !Guards.IsGuard(c) && Guards.GuardList(_house).Count < Guards.MaxGuards(_house);
+                if (GUILayout.Button("Guard", GUILayout.Width(52f))) Guards.MakeGuard(_house, c);
+                GUI.enabled = true;
                 GUILayout.EndHorizontal();
             }
             var unlocked = new List<Character>();
@@ -164,6 +172,25 @@ namespace IFZ.ProductionPlanner
 
             GUILayout.EndHorizontal();
             GUILayout.EndArea();
+        }
+
+        private static void DrawGuards(int capacity)
+        {
+            var guards = Guards.GuardList(_house);
+            int max = Guards.MaxGuards(_house);
+            GUILayout.BeginVertical("box");
+            GUILayout.Label($"<b>Guards {guards.Count}/{max}</b> (1 per {Guards.SpacesPerGuard} spaces). Guards live here, clear turned infected inside, and shoot infected nearby (pistol, uses ammo). Full guard list: residents turn 50 % less.");
+            var byId = CitizensById();
+            foreach (string id in new List<string>(guards))
+            {
+                byId.TryGetValue(id, out var g);
+                GUILayout.BeginHorizontal();
+                string marksman = g != null ? Experience.LevelNames[(int)Combat.MarksmanLevel(g)] : "?";
+                GUILayout.Label(g != null ? $"{g.Name} · Marksman {marksman}" : "(missing)");
+                if (GUILayout.Button("Remove guard", GUILayout.Width(110f))) Guards.RemoveGuard(_house, id);
+                GUILayout.EndHorizontal();
+            }
+            GUILayout.EndVertical();
         }
 
         private static void SortButton(string label, SortMode mode)

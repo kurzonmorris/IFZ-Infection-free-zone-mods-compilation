@@ -1,6 +1,6 @@
 # Infection Free Zone — Modding Reference
 
-> **File version:** 1.7.0 · **Last edit:** 2026-10-06 08:14 UTC
+> **File version:** 1.8.0 · **Last edit:** 2026-10-06 11:30 UTC
 >
 > **Purpose:** Read this file before you work on any mod in this repository. It
 > holds every fact we found about the game, the tools, and our own project
@@ -616,8 +616,15 @@ Names are from `Ifz.dll`. Source tag in brackets. ❓ = not checked by us.
   citizen's **current position**, takes the first with
   `HasSpaceForCitizen()`. `Character.HouseData.House`.
 - Turning: `SicknessController.KillAndTurn` kills critical sick, then spawns
-  `GetChanceToTurn() × deaths` fresh infected (`inf_human_fresh`) in one
-  building.
+  `round(GetChanceToTurn() × deaths)` fresh infected (`inf_human_fresh`) in one
+  building. `SetCriticalSick` does the same when no medbay/hospital works.
+  The building = random adapted `bld_hospital` / `bld_medbay` / `bld_house` /
+  `bld_shelter`, else the HQ (`GetEnterableForHorde`).
+  `SicknessData.GetChanceToTurn()` = `chanceToTurnBasic` or
+  `chanceToTurnTechTurning` (tech `tech_inf_turning_profit`).
+- Damage any character: `Character.ReceiveDamage(weapon, dmg, SubtractionHpReason)`;
+  kill: `Character.Kill(reason)`. `SubtractionHpReason` is in `Gameplay.Units`.
+- IMGUI: `TextAnchor` needs a reference to `UnityEngine.TextRenderingModule`.
 - Work time per worker: `WorkModule.IsWorking()` = `CurrentWork.IsWorkHour()`.
   `WorkerBehaviour.Tick`: tired workers go home; carrying goods stops at night.
 
@@ -663,6 +670,9 @@ Names are from `Ifz.dll`. Source tag in brackets. ❓ = not checked by us.
 | `CharacterFightHandler.GetDamage` (postfix) | productionPlanner | Marksman / combat-skill damage |
 | `CharacterFightHandler.GetWeaponAttackReach` (postfix) | productionPlanner | Marksman / combat-skill range (also patched by JaySNL HighGround) |
 | `CharacterFightHandler.ResetAttackCooldown` (postfix) | productionPlanner | Fire rate; counts Marksman shooting time |
+| `Character.Kill` (prefix) | productionPlanner | Records sickness deaths for guarded houses |
+| `SicknessController.KillAndTurn` / `SetCriticalSick` (prefix) | productionPlanner | Resets the guard turn count |
+| `SicknessController.SpawnHorde` (prefix) | productionPlanner | Scales turned horde size for guarded houses |
 | `WorkModule.ExecuteWork(float)` (prefix) | productionPlanner | Scales work time by job experience (+10/25/50 %) × foreman boost of the building |
 
 ---

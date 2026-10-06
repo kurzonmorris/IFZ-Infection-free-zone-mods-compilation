@@ -7,6 +7,7 @@ using Gameplay.Units.Player.Workers.WorkSystem;
 using Gameplay.Units.Workers;
 using Gameplay.Units.Workers.WorkSystem;
 using HarmonyLib;
+using Gameplay.Units;
 using UnityEngine;
 
 namespace IFZ.ProductionPlanner
@@ -177,11 +178,39 @@ namespace IFZ.ProductionPlanner
         }
     }
 
+    [HarmonyPatch(typeof(Character), nameof(Character.Kill))]
+    internal static class SickDeathPatch
+    {
+        private static void Prefix(Character __instance, SubtractionHpReason reason) => Guards.OnCitizenKilled(__instance, reason);
+    }
+
+    [HarmonyPatch(typeof(Controllers.Sickness.SicknessController), "KillAndTurn")]
+    internal static class SickTurnStartPatch
+    {
+        private static void Prefix() => Guards.BeginSicknessDeaths();
+    }
+
+    [HarmonyPatch(typeof(Controllers.Sickness.SicknessController), "SetCriticalSick")]
+    internal static class SickCriticalStartPatch
+    {
+        private static void Prefix() => Guards.BeginSicknessDeaths();
+    }
+
+    [HarmonyPatch(typeof(Controllers.Sickness.SicknessController), "SpawnHorde")]
+    internal static class GuardedTurnPatch
+    {
+        private static bool Prefix(ref int count)
+        {
+            count = Guards.AdjustHorde(count);
+            return count > 0;
+        }
+    }
+
     internal static class Patches
     {
         public static void Apply(Harmony harmony)
         {
-            foreach (var type in new[] { typeof(PriorityGroupsPatch), typeof(SkipLockedCandidatePatch), typeof(PreferUnlockedWorkerPatch), typeof(ExperienceBoostPatch), typeof(HouseOffPatch), typeof(LockedHousePatch), typeof(SkillLevelPatch), typeof(CombatDamagePatch), typeof(CombatRangePatch), typeof(CombatFireRatePatch) })
+            foreach (var type in new[] { typeof(PriorityGroupsPatch), typeof(SkipLockedCandidatePatch), typeof(PreferUnlockedWorkerPatch), typeof(ExperienceBoostPatch), typeof(HouseOffPatch), typeof(LockedHousePatch), typeof(SkillLevelPatch), typeof(CombatDamagePatch), typeof(CombatRangePatch), typeof(CombatFireRatePatch), typeof(SickDeathPatch), typeof(SickTurnStartPatch), typeof(SickCriticalStartPatch), typeof(GuardedTurnPatch) })
             {
                 try
                 {

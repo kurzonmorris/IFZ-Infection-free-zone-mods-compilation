@@ -1,6 +1,6 @@
 # Features and versions
 
-> **File version:** 1.9.0 · **Last edit:** 2026-10-06 08:14 UTC
+> **File version:** 1.10.0 · **Last edit:** 2026-10-06 11:30 UTC
 
 Every edit, feature, and change to any file in this repository. Newest first.
 Rules: see `Explained-game_infectionFreeZone.md` §1.2 and §1.3.
@@ -9,27 +9,34 @@ Rules: see `Explained-game_infectionFreeZone.md` §1.2 and §1.3.
 
 | File | Version |
 |------|---------|
-| README.md | 1.6.0 |
-| FEATURES_AND_VERSIONS.md | 1.9.0 |
-| Explained-game_infectionFreeZone.md | 1.7.0 |
+| README.md | 1.7.0 |
+| FEATURES_AND_VERSIONS.md | 1.10.0 |
+| Explained-game_infectionFreeZone.md | 1.8.0 |
 | Explained-game_engineMap.md | 1.0.0 |
 | docs/INSTALL.md | 1.0.0 |
 | docs/HOTKEYS.md | 1.1.0 |
 | mods/_template (Plugin.cs, template.csproj, README.md) | 1.0.0 (template mod 0.1.0) |
 | mods/Directory.Build.props | 1.0.0 |
-| plugins/README.md | 1.6.0 |
+| plugins/README.md | 1.7.0 |
 | research/README.md | 1.2.0 |
 | .github/workflows/release.yml | 1.0.0 |
-| mods/productionPlanner (Plugin.cs, Planner.cs, GoalStore.cs, Crews.cs, Patches.cs, WorkerWindow.cs, Experience.cs, ExperienceRules.cs, Houses.cs, HouseWindow.cs, Combat.cs, productionPlanner.csproj) | 0.6.0 |
-| mods/productionPlanner/README.md | 1.5.0 |
-| mods/productionPlanner/SPEC.md | 1.7.0 |
-| plugins/IFZ-productionPlanner-v0.6.0.dll | 0.6.0 |
+| mods/productionPlanner (Plugin.cs, Planner.cs, GoalStore.cs, Crews.cs, Patches.cs, WorkerWindow.cs, Experience.cs, ExperienceRules.cs, Houses.cs, HouseWindow.cs, Combat.cs, Guards.cs, UiStyle.cs, productionPlanner.csproj) | 0.7.0 |
+| mods/productionPlanner/README.md | 1.6.0 |
+| mods/productionPlanner/SPEC.md | 1.8.0 |
+| plugins/IFZ-productionPlanner-v0.7.0.dll | 0.7.0 |
 | Pack (Releases zip) | not released |
 
 ## Change log
 
 | Date and time (UTC) | File | Version | Change |
 |---------------------|------|---------|--------|
+| 2026-10-06 11:30 | mods/productionPlanner, plugins/IFZ-productionPlanner-v0.7.0.dll | 0.7.0 | Window opacity slider in every title bar (solid background, 30–100 %). Phase 7: house guards (1 per 25 spaces) — fewer residents turn in fully guarded houses, guards clear turned infected inside and shoot infected nearby with ammo. Replaces v0.6.0 DLL. |
+| 2026-10-06 11:30 | mods/productionPlanner/SPEC.md | 1.8.0 | Phase 7 built design. |
+| 2026-10-06 11:30 | mods/productionPlanner/README.md | 1.6.0 | Guards and UI files; limits. |
+| 2026-10-06 11:30 | Explained-game_infectionFreeZone.md | 1.8.0 | Turning details, damage API; new patch owners. |
+| 2026-10-06 11:30 | README.md | 1.7.0 | Opacity slider and house guards. |
+| 2026-10-06 11:30 | plugins/README.md | 1.7.0 | DLL renamed to v0.7.0. |
+| 2026-10-06 11:30 | FEATURES_AND_VERSIONS.md | 1.10.0 | Recorded the changes above. |
 | 2026-10-06 08:14 | mods/productionPlanner, plugins/IFZ-productionPlanner-v0.6.0.dll | 0.6.0 | Phase 5: squad skill levels (Novice/Moderate/Expert by shifts active outside the walls), skill effect +10/25/50 %, Marksman for guards (6/21/61 h of real shooting), combat table for damage/fire rate/range; squad view in F6. Replaces v0.5.0 DLL. |
 | 2026-10-06 08:14 | mods/productionPlanner/SPEC.md | 1.7.0 | Recorded answers for phases 5 and 6; built interpretation of phase 5. |
 | 2026-10-06 08:14 | mods/productionPlanner/README.md | 1.5.0 | Combat file, limits, 37 tests. |

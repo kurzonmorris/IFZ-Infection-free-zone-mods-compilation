@@ -1,8 +1,8 @@
 # productionPlanner
 
-> **File version:** 1.5.0 · **Last edit:** 2026-10-06 08:14 UTC
+> **File version:** 1.6.0 · **Last edit:** 2026-10-06 11:30 UTC
 
-Mod version **0.6.0** · DLL `IFZ-productionPlanner-v0.6.0.dll` · GUID `kurzon.ifz.productionPlanner` · Hotkey **F6**
+Mod version **0.7.0** · DLL `IFZ-productionPlanner-v0.7.0.dll` · GUID `kurzon.ifz.productionPlanner` · Hotkey **F6**
 
 Source files:
 - `Plugin.cs` — config, F6 window (IMGUI), Auto loop.
@@ -15,6 +15,8 @@ Source files:
 - `Houses.cs` — house on/off and locked residents; saves to `kurzon.ifz.productionPlanner.houses.txt`.
 - `HouseWindow.cs` — the resizable residents window.
 - `Combat.cs` — squad skill levels, Marksman hours, combat bonuses (`CombatRules` = testable thresholds); saves to `kurzon.ifz.productionPlanner.combat.txt`.
+- `Guards.cs` — house guards: turn weighting, clearing infected inside, shooting nearby infected; saves to `kurzon.ifz.productionPlanner.guards.txt`.
+- `UiStyle.cs` — solid window background and the opacity slider.
 - `ExperienceRules.cs` — levels and the 3-job / forget-oldest rule (no game types, so it can be tested outside the game).
 - `SPEC.md` — the full workforce plan, decisions and build order.
 
@@ -29,7 +31,7 @@ workers needed     = ceil(goal ÷ per worker per day)
 Limits: `InitialMaxWorkers` (slots from building volume) and `MaxDayProduction` (daily cap from volume).
 Game facts behind this: `Explained-game_infectionFreeZone.md` §9.5a–§9.5c.
 
-## Not handled in 0.6.0
+## Not handled in 0.7.0
 
 - Buildings without a `ProductionWork` (for example farms, sawmill, forester, gather works) show "not supported".
 - Rest and fatigue are not modelled separately. The hauling allowance covers them.
@@ -43,6 +45,8 @@ Game facts behind this: `Explained-game_infectionFreeZone.md` §9.5a–§9.5c.
 - The foreman boost and the personal boost multiply: (1 + personal) × (1 + foreman).
 - Squad activity is sampled every 2 seconds; a short trip shorter than that may not count.
 - HighGround (JaySNL) also patches `GetWeaponAttackReach`; both multiply, so range bonuses stack if both are installed.
+- House guards keep their day job; they guard only while inside the house.
+- Guard shots have no visible tracer and target infected only, not raiders.
 - Auto-pick may fight the game's own balancing and move people more often than vanilla. Watch for this in testing.
 
 ## Tests
