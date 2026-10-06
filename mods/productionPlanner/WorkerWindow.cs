@@ -201,6 +201,9 @@ namespace IFZ.ProductionPlanner
                 GUILayout.EndVertical();
                 return;
             }
+            float marksmanHours = Combat.MarksmanHoursOf(_details);
+            if (marksmanHours > 0f)
+                GUILayout.Label($"Marksman: {Experience.LevelNames[(int)Combat.MarksmanLevel(_details)]} ({marksmanHours:0.0} h of shooting; Novice 6, Moderate 21, Expert 61)");
             var jobs = Experience.Jobs(_details);
             if (jobs.Count == 0) GUILayout.Label("No job experience yet.");
             foreach (var j in new List<JobExperience>(jobs))

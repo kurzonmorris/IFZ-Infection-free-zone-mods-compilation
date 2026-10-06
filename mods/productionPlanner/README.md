@@ -1,8 +1,8 @@
 # productionPlanner
 
-> **File version:** 1.4.0 · **Last edit:** 2026-10-06 00:05 UTC
+> **File version:** 1.5.0 · **Last edit:** 2026-10-06 08:14 UTC
 
-Mod version **0.5.0** · DLL `IFZ-productionPlanner-v0.5.0.dll` · GUID `kurzon.ifz.productionPlanner` · Hotkey **F6**
+Mod version **0.6.0** · DLL `IFZ-productionPlanner-v0.6.0.dll` · GUID `kurzon.ifz.productionPlanner` · Hotkey **F6**
 
 Source files:
 - `Plugin.cs` — config, F6 window (IMGUI), Auto loop.
@@ -14,6 +14,7 @@ Source files:
 - `Experience.cs` — job experience per worker; accrual every 2 s from game time; saves to `kurzon.ifz.productionPlanner.experience.txt`.
 - `Houses.cs` — house on/off and locked residents; saves to `kurzon.ifz.productionPlanner.houses.txt`.
 - `HouseWindow.cs` — the resizable residents window.
+- `Combat.cs` — squad skill levels, Marksman hours, combat bonuses (`CombatRules` = testable thresholds); saves to `kurzon.ifz.productionPlanner.combat.txt`.
 - `ExperienceRules.cs` — levels and the 3-job / forget-oldest rule (no game types, so it can be tested outside the game).
 - `SPEC.md` — the full workforce plan, decisions and build order.
 
@@ -28,7 +29,7 @@ workers needed     = ceil(goal ÷ per worker per day)
 Limits: `InitialMaxWorkers` (slots from building volume) and `MaxDayProduction` (daily cap from volume).
 Game facts behind this: `Explained-game_infectionFreeZone.md` §9.5a–§9.5c.
 
-## Not handled in 0.5.0
+## Not handled in 0.6.0
 
 - Buildings without a `ProductionWork` (for example farms, sawmill, forester, gather works) show "not supported".
 - Rest and fatigue are not modelled separately. The hauling allowance covers them.
@@ -40,8 +41,10 @@ Game facts behind this: `Explained-game_infectionFreeZone.md` §9.5a–§9.5c.
 - With an experience limit on, the native panel's max workers shows the mod's working number; the wanted max is in the planner window.
 - The foreman role takes the slot of the job it replaced. If the foreman later learns 3 other jobs, the foreman role can be forgotten as the oldest.
 - The foreman boost and the personal boost multiply: (1 + personal) × (1 + foreman).
+- Squad activity is sampled every 2 seconds; a short trip shorter than that may not count.
+- HighGround (JaySNL) also patches `GetWeaponAttackReach`; both multiply, so range bonuses stack if both are installed.
 - Auto-pick may fight the game's own balancing and move people more often than vanilla. Watch for this in testing.
 
 ## Tests
 
-`ExperienceRules` tested outside the game: 25 checks (level thresholds, 3-job limit, one training slot, forget oldest on reaching Novice, cap at 15 days, foreman needs Expert, foreman replaces the job and resets to 0, one foreman role per worker, foreman track accrues and caps, foreman not dropped as training, stop foreman). All passed on 2026-10-05.
+Tested outside the game: 37 checks. `ExperienceRules` (25: levels, 3-job limit, training slot, forget oldest, cap, foreman rules) and `CombatRules` (12: Marksman at 6 / 21 / 61 h, squad skills at 10 / 24 shifts). All passed on 2026-10-06.

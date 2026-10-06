@@ -1,6 +1,6 @@
 # Infection Free Zone — Modding Reference
 
-> **File version:** 1.6.0 · **Last edit:** 2026-10-06 00:05 UTC
+> **File version:** 1.7.0 · **Last edit:** 2026-10-06 08:14 UTC
 >
 > **Purpose:** Read this file before you work on any mod in this repository. It
 > holds every fact we found about the game, the tools, and our own project
@@ -442,6 +442,16 @@ Names are from `Ifz.dll`. Source tag in brackets. ❓ = not checked by us.
   `GroupDraft.StopToShoot*`.
 - Movement speed: `Gameplay.Units.Movements.Movement.CalculateSpeed(float, float)`.
   Filter by `Character.Type == CharacterType.Human`. (MiKanSei39)
+- Skills: every skill effect reads `SkillsHandler.GetSkillBonusValue(SkillId)`
+  (`CharacterSkill.BonusValue`, from `StaticSkillInfo` assets). Users: Slasher
+  → `CharacterFightHandler.ModifyDamageWithSkills`; SharpShooter → reach,
+  chance to attack, `Character.GetSkillReachModificationValue`; HawkEye →
+  `Group` view range; Strong → `CharacterSkillReactor`; RaceDriver /
+  EconomicDriver → `Vehicle`; Shoplifter / Inspector → `ScavengeWork`.
+- Fire rate: `CharacterFightHandler.ResetAttackCooldown(weapon)` sets
+  `_nextAttackTime = now + AttackCooldownGts ± 15 %`
+  (`_lastTimeCooldownRefreshed` = now). `PerformShootRangeAttack` (practice)
+  also calls it; real fights have `HaveEnemy()` true.
 - Death: `Character.OnCharacterDeath`, `ICharacterDyingSignal`,
   `DropResourceOnDeathController`. `ICharacter` is in `Gameplay.Units.Virtual`.
 - Vehicle squad cap: `GetMaxGroupCount`; vehicle capacity
@@ -649,6 +659,10 @@ Names are from `Ifz.dll`. Source tag in brackets. ❓ = not checked by us.
 | `WorkBase.GetClosestWorker` (postfix) | productionPlanner | Picks the unlocked, least experienced worker to move |
 | `Structure.HasSpaceForCitizen` (postfix) | productionPlanner | False for houses turned off |
 | `Character.FindBestHouse` (prefix) | productionPlanner | Keeps locked citizens in their house |
+| `SkillsHandler.GetSkillBonusValue` (postfix) | productionPlanner | Squad skill levels × 1.10 / 1.25 / 1.50 (non-combat skills) |
+| `CharacterFightHandler.GetDamage` (postfix) | productionPlanner | Marksman / combat-skill damage |
+| `CharacterFightHandler.GetWeaponAttackReach` (postfix) | productionPlanner | Marksman / combat-skill range (also patched by JaySNL HighGround) |
+| `CharacterFightHandler.ResetAttackCooldown` (postfix) | productionPlanner | Fire rate; counts Marksman shooting time |
 | `WorkModule.ExecuteWork(float)` (prefix) | productionPlanner | Scales work time by job experience (+10/25/50 %) × foreman boost of the building |
 
 ---
