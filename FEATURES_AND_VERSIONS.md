@@ -1,6 +1,6 @@
 # Features and versions
 
-> **File version:** 1.10.0 · **Last edit:** 2026-10-06 11:30 UTC
+> **File version:** 1.11.0 · **Last edit:** 2026-10-06 11:35 UTC
 
 Every edit, feature, and change to any file in this repository. Newest first.
 Rules: see `Explained-game_infectionFreeZone.md` §1.2 and §1.3.
@@ -9,27 +9,38 @@ Rules: see `Explained-game_infectionFreeZone.md` §1.2 and §1.3.
 
 | File | Version |
 |------|---------|
-| README.md | 1.7.0 |
-| FEATURES_AND_VERSIONS.md | 1.10.0 |
-| Explained-game_infectionFreeZone.md | 1.8.0 |
+| README.md | 1.8.0 |
+| FEATURES_AND_VERSIONS.md | 1.11.0 |
+| Explained-game_infectionFreeZone.md | 1.9.0 |
 | Explained-game_engineMap.md | 1.0.0 |
 | docs/INSTALL.md | 1.0.0 |
 | docs/HOTKEYS.md | 1.1.0 |
 | mods/_template (Plugin.cs, template.csproj, README.md) | 1.0.0 (template mod 0.1.0) |
 | mods/Directory.Build.props | 1.0.0 |
-| plugins/README.md | 1.7.0 |
+| plugins/README.md | 1.8.0 |
 | research/README.md | 1.2.0 |
 | .github/workflows/release.yml | 1.0.0 |
-| mods/productionPlanner (Plugin.cs, Planner.cs, GoalStore.cs, Crews.cs, Patches.cs, WorkerWindow.cs, Experience.cs, ExperienceRules.cs, Houses.cs, HouseWindow.cs, Combat.cs, Guards.cs, UiStyle.cs, productionPlanner.csproj) | 0.7.0 |
-| mods/productionPlanner/README.md | 1.6.0 |
+| mods/productionPlanner (Plugin.cs, Planner.cs, GoalStore.cs, Crews.cs, Patches.cs, WorkerWindow.cs, Experience.cs, ExperienceRules.cs, Houses.cs, HouseWindow.cs, Combat.cs, Guards.cs, UiStyle.cs, productionPlanner.csproj) | 0.7.1 |
+| mods/productionPlanner/README.md | 1.7.0 |
 | mods/productionPlanner/SPEC.md | 1.8.0 |
-| plugins/IFZ-productionPlanner-v0.7.0.dll | 0.7.0 |
+| plugins/IFZ-productionPlanner-v0.7.1.dll | 0.7.1 |
+| mods/modMenu (Plugin.cs, modMenu.csproj) | 0.1.0 |
+| mods/modMenu/README.md | 1.0.0 |
+| plugins/IFZ-modMenu-v0.1.0.dll | 0.1.0 |
 | Pack (Releases zip) | not released |
 
 ## Change log
 
 | Date and time (UTC) | File | Version | Change |
 |---------------------|------|---------|--------|
+| 2026-10-06 11:35 | mods/modMenu, plugins/IFZ-modMenu-v0.1.0.dll | 0.1.0 | New mod. Mods button bottom-right; lists window keys found in every BepInEx mod's settings; opens them by direct ToggleWindow() call or a one-frame faked key; ExtraEntries for hand-added keys. |
+| 2026-10-06 11:35 | mods/modMenu/README.md | 1.0.0 | New. |
+| 2026-10-06 11:35 | mods/productionPlanner, plugins/IFZ-productionPlanner-v0.7.1.dll | 0.7.1 | Public static ToggleWindow() for the Mod Menu. Replaces v0.7.0 DLL. |
+| 2026-10-06 11:35 | mods/productionPlanner/README.md | 1.7.0 | ToggleWindow note. |
+| 2026-10-06 11:35 | Explained-game_infectionFreeZone.md | 1.9.0 | Coexistence rule: ToggleWindow hook and key naming; Input patch owner. |
+| 2026-10-06 11:35 | README.md | 1.8.0 | Mod Menu section. |
+| 2026-10-06 11:35 | plugins/README.md | 1.8.0 | Listed both DLLs. |
+| 2026-10-06 11:35 | FEATURES_AND_VERSIONS.md | 1.11.0 | Recorded the changes above. |
 | 2026-10-06 11:30 | mods/productionPlanner, plugins/IFZ-productionPlanner-v0.7.0.dll | 0.7.0 | Window opacity slider in every title bar (solid background, 30–100 %). Phase 7: house guards (1 per 25 spaces) — fewer residents turn in fully guarded houses, guards clear turned infected inside and shoot infected nearby with ammo. Replaces v0.6.0 DLL. |
 | 2026-10-06 11:30 | mods/productionPlanner/SPEC.md | 1.8.0 | Phase 7 built design. |
 | 2026-10-06 11:30 | mods/productionPlanner/README.md | 1.6.0 | Guards and UI files; limits. |

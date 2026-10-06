@@ -26,7 +26,7 @@ namespace IFZ.ProductionPlanner
     {
         public const string Guid = "kurzon.ifz.productionPlanner";
         public const string Name = "IFZ Production Planner";
-        public const string Version = "0.7.0";
+        public const string Version = "0.7.1";
 
         internal static ManualLogSource Log;
         internal static bool ExperienceEnabled = true;
@@ -48,6 +48,7 @@ namespace IFZ.ProductionPlanner
         private ConfigEntry<bool> _guards;
 
         private bool _show;
+        private static Plugin _instance;
         private Rect _window = new Rect(80f, 120f, 380f, 10f);
         private Structure _shownStructure;
         private string _goalText = "";
@@ -56,8 +57,14 @@ namespace IFZ.ProductionPlanner
         private Harmony _harmony;
         private readonly int _windowId = Guid.GetHashCode();
 
+        public static void ToggleWindow()
+        {
+            if (_instance != null) _instance._show = !_instance._show;
+        }
+
         private void Awake()
         {
+            _instance = this;
             Log = Logger;
             _enabled = Config.Bind("General", "Enabled", true, "Master switch. False makes the mod do nothing.");
             _toggleKey = Config.Bind("Controls", "ToggleWindow", new KeyboardShortcut(KeyCode.F6), "Open or close the planner window.");
