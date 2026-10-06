@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Gameplay.Units.Characters;
+using Gameplay.Units.Virtual;
 using Gameplay.Units.Player.Workers.WorkSystem;
 using Gameplay.Units.Workers;
 using Gameplay.Units.Workers.WorkSystem;
@@ -125,11 +126,62 @@ namespace IFZ.ProductionPlanner
         }
     }
 
+    [HarmonyPatch(typeof(Gameplay.Units.Skills.SkillsHandler), nameof(Gameplay.Units.Skills.SkillsHandler.GetSkillBonusValue))]
+    internal static class SkillLevelPatch
+    {
+        private static void Postfix(Gameplay.Units.Skills.SkillsHandler __instance, Gameplay.Units.Skills.SkillId id, ref float __result)
+        {
+            if (__result != 0f && Plugin.CombatEnabled) __result *= Combat.SkillMultiplier(__instance, id);
+        }
+    }
+
+    [HarmonyPatch(typeof(CharacterFightHandler), "GetDamage")]
+    internal static class CombatDamagePatch
+    {
+        private static readonly FieldInfo CharacterField = AccessTools.Field(typeof(CharacterFightHandler), "_character");
+
+        private static void Postfix(CharacterFightHandler __instance, ref float __result)
+        {
+            if (!Plugin.CombatEnabled) return;
+            if (CharacterField.GetValue(__instance) is ICharacter c && Combat.TryGetBonus(c, out var bonus)) __result *= 1f + bonus.Damage;
+        }
+    }
+
+    [HarmonyPatch(typeof(CharacterFightHandler), nameof(CharacterFightHandler.GetWeaponAttackReach))]
+    internal static class CombatRangePatch
+    {
+        private static readonly FieldInfo CharacterField = AccessTools.Field(typeof(CharacterFightHandler), "_character");
+
+        private static void Postfix(CharacterFightHandler __instance, ref float __result)
+        {
+            if (!Plugin.CombatEnabled) return;
+            if (CharacterField.GetValue(__instance) is ICharacter c && Combat.TryGetBonus(c, out var bonus)) __result *= 1f + bonus.Range;
+        }
+    }
+
+    [HarmonyPatch(typeof(CharacterFightHandler), "ResetAttackCooldown")]
+    internal static class CombatFireRatePatch
+    {
+        private static readonly FieldInfo CharacterField = AccessTools.Field(typeof(CharacterFightHandler), "_character");
+        private static readonly FieldInfo NextField = AccessTools.Field(typeof(CharacterFightHandler), "_nextAttackTime");
+        private static readonly FieldInfo LastField = AccessTools.Field(typeof(CharacterFightHandler), "_lastTimeCooldownRefreshed");
+
+        private static void Postfix(CharacterFightHandler __instance, Gameplay.Units.Equipment.Weapon weapon)
+        {
+            if (!Plugin.CombatEnabled || !(CharacterField.GetValue(__instance) is ICharacter c)) return;
+            if (__instance.HaveEnemy()) Combat.OnShot(c, weapon != null && weapon.Stats != null ? weapon.Stats.AttackCooldownGts : 1f);
+            if (!Combat.TryGetBonus(c, out var bonus) || bonus.FireRate <= 0f) return;
+            float last = (float)LastField.GetValue(__instance);
+            float next = (float)NextField.GetValue(__instance);
+            NextField.SetValue(__instance, last + (next - last) / (1f + bonus.FireRate));
+        }
+    }
+
     internal static class Patches
     {
         public static void Apply(Harmony harmony)
         {
-            foreach (var type in new[] { typeof(PriorityGroupsPatch), typeof(SkipLockedCandidatePatch), typeof(PreferUnlockedWorkerPatch), typeof(ExperienceBoostPatch), typeof(HouseOffPatch), typeof(LockedHousePatch) })
+            foreach (var type in new[] { typeof(PriorityGroupsPatch), typeof(SkipLockedCandidatePatch), typeof(PreferUnlockedWorkerPatch), typeof(ExperienceBoostPatch), typeof(HouseOffPatch), typeof(LockedHousePatch), typeof(SkillLevelPatch), typeof(CombatDamagePatch), typeof(CombatRangePatch), typeof(CombatFireRatePatch) })
             {
                 try
                 {

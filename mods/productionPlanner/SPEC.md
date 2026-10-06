@@ -1,6 +1,6 @@
 # productionPlanner — feature spec (workforce expansion)
 
-> **File version:** 1.6.0 · **Last edit:** 2026-10-06 00:05 UTC
+> **File version:** 1.7.0 · **Last edit:** 2026-10-06 08:14 UTC
 >
 > Kurzon's requests of 2026-10-04 and 2026-10-05, with a feasibility check
 > against the decompiled game (`Ifz.dll`, 2026-09-18). Status per feature:
@@ -191,18 +191,33 @@
 9. **House guards** live in the house they guard. The 50 % applies only to the
    residents of that house.
 
-**Still open:**
+**Decided 2026-10-06:**
 
-- Q7a. Squad skills: how many shifts per level? (Novice is reached when the
-  skill is taught.) For example 6 / 10 / 14 shifts (= 3 / 5 / 7 days)?
-- Q8a. Marksman: 6 / 15 / 40 hours of shooting — totals or steps
-  (6, then +15, then +40)? In-game hours?
-10. **Night crew size:** the same as the day max workers (doubles output),
-    or its own number?
-11. **When night shift starts:** a manual switch per building, automatic when
-    there are free workers, or both?
-12. **Outdoor night work:** allow night shift on outdoor jobs (farms,
-    foresters), or only indoor buildings?
+- Q7a. Squad skills: Novice when taught; Moderate after 10 shifts; Expert
+  after 24 shifts (10 + 14) active outside the walls. 1 shift = 12 hours.
+- Q8a. Marksman: Novice at 6 h of shooting, Moderate at 21 h (6 + 15),
+  Expert at 61 h (21 + 40). In-game hours.
+- Q10. Night crew = the same size as the day crew.
+- Q11. Night shift starts automatically: as the day crew goes home, the night
+  crew comes out, with a short overlap.
+- Q12. Outdoor jobs: day shift only, for now.
+
+**Built interpretation (0.6.0) — check in testing:**
+
+- "Active outside the walls" = the squad is not inside a building and is
+  moving, scavenging, on an expedition, or has an enemy in view. Standing
+  still outside does not count.
+- Normal squad skills (Strong, HawkEye, RaceDriver, EconomicDriver,
+  Shoplifter, Inspector): the game's own skill value × 1.10 / 1.25 / 1.50 at
+  Novice / Moderate / Expert.
+- Combat skills (Slasher for melee, SharpShooter for ranged) keep their game
+  value and add the Marksman table (damage / fire rate / range).
+- A character's combat bonus uses the higher of their Marksman level and
+  their combat skill level; the two do not stack.
+- Marksman time counts only for workers on a guard job (tower, gate, bunker)
+  in a real fight; the time between two shots counts if the gap is at most
+  2 × the weapon's cooldown (minimum 10 game seconds). Shooting-range
+  practice does not count.
 
 ## 12. Build order (proposal)
 
@@ -212,8 +227,8 @@
 | 2 | §4 job experience | built in 0.3.0, testing |
 | 3 | §5 foreman | built in 0.4.0, testing |
 | 4 | §6 houses | built in 0.5.0, testing |
-| 5 | §8 squad skills and Marksman | after Q7a, Q8a |
-| 6 | §10 night shift | after Q10–Q12 |
+| 5 | §8 squad skills and Marksman | built in 0.6.0, testing |
+| 6 | §10 night shift | ready |
 | 7 | §9 house guards | needs research |
 | 8 | §7 warehouse staff | needs research |
 

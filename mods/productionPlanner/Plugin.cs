@@ -26,10 +26,11 @@ namespace IFZ.ProductionPlanner
     {
         public const string Guid = "kurzon.ifz.productionPlanner";
         public const string Name = "IFZ Production Planner";
-        public const string Version = "0.5.0";
+        public const string Version = "0.6.0";
 
         internal static ManualLogSource Log;
         internal static bool ExperienceEnabled = true;
+        internal static bool CombatEnabled = true;
 
         private ConfigEntry<bool> _enabled;
         private ConfigEntry<KeyboardShortcut> _toggleKey;
@@ -42,6 +43,7 @@ namespace IFZ.ProductionPlanner
         private ConfigEntry<bool> _experience;
         private ConfigEntry<bool> _autoPick;
         private ConfigEntry<bool> _useExperience;
+        private ConfigEntry<bool> _combat;
 
         private bool _show;
         private Rect _window = new Rect(80f, 120f, 380f, 10f);
@@ -66,6 +68,7 @@ namespace IFZ.ProductionPlanner
             _experience = Config.Bind("Experience", "Enabled", true, "Workers gain job experience and work faster: Novice +10 %, Moderate +25 %, Expert +50 %.");
             _autoPick = Config.Bind("Experience", "AutoPickExperienced", true, "Move the most experienced free or unlocked worker into a job when they beat a current worker there.");
             _useExperience = Config.Bind("Factors", "UseExperience", true, "Include the experience boost of the building's current workers.");
+            _combat = Config.Bind("Combat", "Enabled", true, "Squad skill levels and Marksman experience for guards.");
             _harmony = new Harmony(Guid);
             Patches.Apply(_harmony);
             Logger.LogInfo($"{Name} v{Version} loaded.");
@@ -93,6 +96,8 @@ namespace IFZ.ProductionPlanner
                     ExperienceEnabled = _experience.Value;
                     Crews.AutoPick = _experience.Value && _autoPick.Value;
                     if (ExperienceEnabled) Experience.Accrue();
+                    CombatEnabled = _combat.Value;
+                    if (CombatEnabled) Combat.Tick();
                     Crews.Maintain();
                     Houses.Maintain();
                 }
@@ -130,10 +135,15 @@ namespace IFZ.ProductionPlanner
         private void OnDestroy()
         {
             Experience.Save();
+            Combat.Save();
             _harmony?.UnpatchSelf();
         }
 
-        private void OnApplicationQuit() => Experience.Save();
+        private void OnApplicationQuit()
+        {
+            Experience.Save();
+            Combat.Save();
+        }
 
         private void OnGUI()
         {
@@ -163,7 +173,12 @@ namespace IFZ.ProductionPlanner
 
             if (structure == null)
             {
-                GUILayout.Label("Select a building.");
+                if (_combat.Value && DrawSquad()) 
+                {
+                    Footer();
+                    return;
+                }
+                GUILayout.Label("Select a building or a squad.");
                 Footer();
                 return;
             }
@@ -298,6 +313,35 @@ namespace IFZ.ProductionPlanner
                 ? $"Produced today: {plan.ProducedToday}"
                 : $"Produced since tracking began today: {plan.ProducedToday} (full count from tomorrow)");
             Footer();
+        }
+
+        private bool DrawSquad()
+        {
+            var selected = Planner.Resolve<Gameplay.Units.SquadsController>()?.SelectedSquads;
+            if (selected == null || selected.Count == 0) return false;
+            var squad = selected[0];
+            if (squad == null) return false;
+            GUILayout.Label("<b>Squad skills</b>");
+            foreach (var c in squad.Characters)
+            {
+                if (c == null) continue;
+                var parts = new System.Collections.Generic.List<string>();
+                if (c.SkillsHandler != null)
+                {
+                    foreach (var skill in c.SkillsHandler.Skills)
+                    {
+                        if (skill == null || !skill.IsActivated) continue;
+                        var level = Combat.SkillLevel(c, skill.Id);
+                        float shifts = Combat.SkillHoursOf(c, skill.Id) / CombatRules.ShiftHours;
+                        parts.Add($"{skill.Id} {Experience.LevelNames[(int)level]} ({shifts:0.#} shifts)");
+                    }
+                }
+                var marksman = Combat.MarksmanLevel(c);
+                if (marksman != Level.None) parts.Add($"Marksman {Experience.LevelNames[(int)marksman]}");
+                GUILayout.Label($"{c.Name}: " + (parts.Count > 0 ? string.Join(" · ", parts.ToArray()) : "no skills"));
+            }
+            GUILayout.Label("<size=11>Skill levels grow by shifts active outside the walls (12 h = 1 shift): Moderate at 10, Expert at 24.</size>");
+            return true;
         }
 
         private void DrawHouse(Structure house)

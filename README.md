@@ -1,6 +1,6 @@
 # IFZ Compilation — Infection Free Zone mods
 
-> **File version:** 1.5.0 · **Last edit:** 2026-10-06 00:05 UTC
+> **File version:** 1.6.0 · **Last edit:** 2026-10-06 08:14 UTC
 
 A set of BepInEx mods for **Infection Free Zone** that are built to work together.
 Each mod is a separate DLL, so you install only what you want.
@@ -46,7 +46,7 @@ See the [install guide](docs/INSTALL.md).
 
 | Mod | Version | Type | Summary |
 |-----|---------|------|---------|
-| [Production Planner](#productionplanner--v050) | 0.5.0 | Function | Daily output goals, 9 work priorities, building and house on/off, named workers locked to jobs and houses, job experience and foremen. |
+| [Production Planner](#productionplanner--v060) | 0.6.0 | Function | Daily output goals, 9 work priorities, building and house on/off, named workers locked to jobs and houses, job experience, foremen, squad skill levels and Marksman. |
 
 <!--
 Copy this block for each mod. Keep the heading = the mod name.
@@ -65,10 +65,10 @@ Short one-line description.
 </details>
 -->
 
-### productionPlanner — v0.5.0
+### productionPlanner — v0.6.0
 
 Set a daily production goal on a building. The mod works out how many workers the building needs and tells you, or sets the max workers for you.
-File: [`IFZ-productionPlanner-v0.5.0.dll`](plugins/IFZ-productionPlanner-v0.5.0.dll) · Hotkey: **F6** · Status: test build.
+File: [`IFZ-productionPlanner-v0.6.0.dll`](plugins/IFZ-productionPlanner-v0.6.0.dll) · Hotkey: **F6** · Status: test build.
 
 <details>
 <summary><b>Planner window</b> — a floating box that follows the building you select</summary>
@@ -139,6 +139,25 @@ File: [`IFZ-productionPlanner-v0.5.0.dll`](plugins/IFZ-productionPlanner-v0.5.0.
 - **Residents…** opens a separate, resizable window: all citizens on the left (name, gender, age, worker / child / soldier, current house), locked residents on the right. Sort by name, gender or house; search by name.
 - **→** moves a citizen in and locks them there (if the house is full, an unlocked resident moves out). **←** unlocks them. **Lock current residents** and **Unlock all** work on the whole house.
 - A locked citizen keeps that house when they change job. Unlocked citizens behave as normal.
+
+</details>
+
+<details>
+<summary><b>Squad skills and Marksman</b> — soldiers and guards get better with real use</summary>
+
+- **Squad skills** (the game's own skills) get levels. A taught skill starts at **Novice**; **Moderate** after 10 shifts and **Expert** after 24 shifts active outside the walls (1 shift = 12 hours: moving, scavenging, on an expedition or facing an enemy; not standing still or inside a building).
+- Normal skills (Strong, HawkEye, RaceDriver, EconomicDriver, Shoplifter, Inspector): the skill's effect +10 % / +25 % / +50 %.
+- Combat skills (Slasher, SharpShooter) and **Marksman** use the combat table:
+
+  | Level | Damage | Fire rate | Range |
+  |-------|--------|-----------|-------|
+  | Novice | +10 % | +5 % | +10 % |
+  | Moderate | +20 % | +10 % | +20 % |
+  | Expert | +40 % | +20 % | +30 % |
+
+- **Marksman:** tower, gate and bunker guards earn it in real fights: Novice after 6 hours of shooting, Moderate after 15 more, Expert after 40 more (in-game hours). Shooting-range practice does not count.
+- Select a squad and press **F6** to see each member's skills, levels and shifts. A guard's Marksman level shows under **i** in the worker window.
+- Turn it all off with `Combat / Enabled`.
 
 </details>
 
