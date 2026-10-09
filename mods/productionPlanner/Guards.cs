@@ -41,28 +41,44 @@ namespace IFZ.ProductionPlanner
             return GuardIds.TryGetValue(Houses.Key(house), out var list) ? list : (IReadOnlyList<string>)Array.Empty<string>();
         }
 
+        private static readonly HashSet<string> Index = new HashSet<string>();
+        private static string _indexedSave;
+
         public static bool IsGuard(Character c)
         {
             if (c == null || string.IsNullOrEmpty(c.Id)) return false;
             Load();
-            string prefix = GoalStore.SaveId() + "|";
-            foreach (var pair in GuardIds)
+            string save = GoalStore.SaveId();
+            if (_indexedSave != save)
             {
-                if (pair.Key.StartsWith(prefix, StringComparison.Ordinal) && pair.Value.Contains(c.Id)) return true;
+                _indexedSave = save;
+                Index.Clear();
+                string prefix = save + "|";
+                foreach (var pair in GuardIds)
+                {
+                    if (pair.Key.StartsWith(prefix, StringComparison.Ordinal)) Index.UnionWith(pair.Value);
+                }
             }
-            return false;
+            return Index.Contains(c.Id);
+        }
+
+        public static bool IsThreat(Group g)
+        {
+            if (g == null || g.Fraction == Fraction.Player || g.AffiliationProvider == null) return false;
+            return g.AffiliationProvider.Get(Fraction.Player) == Affiliation.Hostile;
         }
 
         public static bool IsFullyGuarded(Structure house) => house != null && Houses.IsHouse(house) && GuardList(house).Count >= MaxGuards(house);
 
         public static bool MakeGuard(Structure house, Character c)
         {
-            if (c == null || c.IsChild || c.IsSoldier || IsGuard(c) || Houses.IsOff(house)) return false;
+            if (c == null || c.IsChild || c.IsSoldier || IsGuard(c) || Crews.IsLocked(c) || Houses.IsOff(house)) return false;
             var list = GetOrCreate(house);
             if (list.Count >= MaxGuards(house)) return false;
             if (!Houses.IsLockedTo(c, house) && !Houses.Lock(house, c)) return false;
             list.Add(c.Id);
             Save();
+            if (c.WorkModule.CurrentWork != null) c.WorkModule.UnassignWork(true);
             return true;
         }
 
@@ -98,7 +114,16 @@ namespace IFZ.ProductionPlanner
 
             string prefix = GoalStore.SaveId() + "|";
             bool changed = false;
-            var infected = Planner.Resolve<GroupsController>()?.Groups;
+            var all = Planner.Resolve<GroupsController>()?.Groups;
+            List<Group> infected = null;
+            if (all != null)
+            {
+                infected = new List<Group>();
+                foreach (var g in all)
+                {
+                    if (IsThreat(g)) infected.Add(g);
+                }
+            }
             foreach (var key in new List<string>(GuardIds.Keys))
             {
                 if (!key.StartsWith(prefix, StringComparison.Ordinal)) continue;
@@ -121,6 +146,7 @@ namespace IFZ.ProductionPlanner
                         changed = true;
                         continue;
                     }
+                    if (g.WorkModule.CurrentWork != null) g.WorkModule.UnassignWork(true);
                     if (!g.IsSick && g.Enterable == (Gameplay.Core.EnterableSystem.IEnterable)house) inside.Add(g);
                 }
                 if (delta > 0f && inside.Count > 0 && infected != null)
@@ -132,7 +158,7 @@ namespace IFZ.ProductionPlanner
             if (changed) Save();
         }
 
-        private static void ClearInside(string key, Structure house, List<Character> guards, IReadOnlyList<Group> infected, float deltaGts)
+        private static void ClearInside(string key, Structure house, List<Character> guards, List<Group> infected, float deltaGts)
         {
             Group group = null;
             foreach (var g in infected)
@@ -161,7 +187,7 @@ namespace IFZ.ProductionPlanner
             KillProgress[key] = progress;
         }
 
-        private static void Defend(Structure house, List<Character> guards, IReadOnlyList<Group> infected, float now)
+        private static void Defend(Structure house, List<Character> guards, List<Group> infected, float now)
         {
             var weapon = ResourcesDataContainer.Instance?.GetWeaponById(WeaponId);
             if (weapon?.Stats == null) return;
@@ -236,6 +262,7 @@ namespace IFZ.ProductionPlanner
 
         private static void Save()
         {
+            _indexedSave = null;
             try
             {
                 var lines = new List<string>();

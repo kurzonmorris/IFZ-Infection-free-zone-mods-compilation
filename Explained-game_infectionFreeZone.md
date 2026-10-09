@@ -1,6 +1,6 @@
 # Infection Free Zone — Modding Reference
 
-> **File version:** 1.9.0 · **Last edit:** 2026-10-06 11:35 UTC
+> **File version:** 1.10.0 · **Last edit:** 2026-10-09 08:20 UTC
 >
 > **Purpose:** Read this file before you work on any mod in this repository. It
 > holds every fact we found about the game, the tools, and our own project
@@ -418,6 +418,11 @@ Names are from `Ifz.dll`. Source tag in brackets. ❓ = not checked by us.
   `MinBuildingVolumeToConvertLair`. (JaySNL)
 - Swarm aggro can overflow to Infinity/NaN late game. Then night waves stop.
   JaySNL SwarmFix clamps the tier lookup. (JaySNL)
+- **All NPC groups:** `Gameplay.Units.Enemy.GroupsController.Groups` holds every
+  group whose `Fraction != Player` (infected, bandits, army, immigrants,
+  animals…), not only infected. Hostile to the player =
+  `group.AffiliationProvider.Get(Fraction.Player) == Affiliation.Hostile`
+  (same test as `EnemiesProvider.IsEnemy`). (Correction of the JaySNL note.)
 - `Fraction` values: `Player`, `Infected`, `Bandits`, `Bandits_ransom`,
   `Army`, `Immigrants`. Hostility: `group.EnemiesProvider.IsEnemy`. (JaySNL)
 
@@ -675,6 +680,8 @@ Names are from `Ifz.dll`. Source tag in brackets. ❓ = not checked by us.
 | `CharacterFightHandler.GetWeaponAttackReach` (postfix) | productionPlanner | Marksman / combat-skill range (also patched by JaySNL HighGround) |
 | `CharacterFightHandler.ResetAttackCooldown` (postfix) | productionPlanner | Fire rate; counts Marksman shooting time |
 | `UnityEngine.Input.GetKeyDown(KeyCode)` / `GetKey(KeyCode)` (postfix) | modMenu | Fakes a key for one frame to open another mod's window |
+| `WorksPriorityManager.FindWork` (prefix) | productionPlanner | House guards never take a job |
+| `WorkController.GetClosestAvailableWorker` (postfix) | productionPlanner | Skips house guards |
 | `Character.Kill` (prefix) | productionPlanner | Records sickness deaths for guarded houses |
 | `SicknessController.KillAndTurn` / `SetCriticalSick` (prefix) | productionPlanner | Resets the guard turn count |
 | `SicknessController.SpawnHorde` (prefix) | productionPlanner | Scales turned horde size for guarded houses |

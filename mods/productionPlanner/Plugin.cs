@@ -26,7 +26,7 @@ namespace IFZ.ProductionPlanner
     {
         public const string Guid = "kurzon.ifz.productionPlanner";
         public const string Name = "IFZ Production Planner";
-        public const string Version = "0.7.1";
+        public const string Version = "0.8.0";
 
         internal static ManualLogSource Log;
         internal static bool ExperienceEnabled = true;
@@ -80,9 +80,9 @@ namespace IFZ.ProductionPlanner
             _combat = Config.Bind("Combat", "Enabled", true, "Squad skill levels and Marksman experience for guards.");
             _opacity = Config.Bind("Window", "Opacity", 0.95f, new ConfigDescription("Background opacity of the mod's windows. Also set with the slider in each window's title bar.", new AcceptableValueRange<float>(0.3f, 1f)));
             UiStyle.Opacity = _opacity.Value;
-            _guards = Config.Bind("Guards", "Enabled", true, "House guards: fewer residents turn, guards clear turned infected inside and shoot infected near the house.");
+            _guards = Config.Bind("Guards", "Enabled", true, "House guards (full-time job): fewer residents turn, guards clear turned infected inside and shoot every threat near the house.");
             Guards.KillsPerGuardHour = Config.Bind("Guards", "KillsPerGuardHour", 1f, "Infected killed per guard per game hour inside the house.").Value;
-            Guards.ShootRadius = Config.Bind("Guards", "ShootRadius", 35f, "Metres around the house in which guards shoot infected (also limited by the weapon's reach).").Value;
+            Guards.ShootRadius = Config.Bind("Guards", "ShootRadius", 35f, "Metres around the house in which guards shoot threats (also limited by the weapon's reach).").Value;
             _harmony = new Harmony(Guid);
             Patches.Apply(_harmony);
             Logger.LogInfo($"{Name} v{Version} loaded.");
