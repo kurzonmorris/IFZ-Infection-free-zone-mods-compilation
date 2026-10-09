@@ -70,7 +70,7 @@ namespace IFZ.ProductionPlanner
 
         public static bool Lock(Structure structure, WorkBase work, Character character)
         {
-            if (character == null || string.IsNullOrEmpty(character.Id) || IsLocked(character)) return false;
+            if (character == null || string.IsNullOrEmpty(character.Id) || IsLocked(character) || Guards.IsGuard(character)) return false;
             var list = GetOrCreate(Key(structure));
             if (list.Count >= work.InitialMaxWorkers) return false;
             list.Add(character.Id);
@@ -404,7 +404,7 @@ namespace IFZ.ProductionPlanner
             float bestDays = 0f;
             foreach (var c in pool)
             {
-                if (c == null || c.IsSick || c.IsUnderSquadProduction || IsLocked(c)) continue;
+                if (c == null || c.IsSick || c.IsUnderSquadProduction || IsLocked(c) || Guards.IsGuard(c)) continue;
                 var current = c.WorkModule.CurrentWork;
                 if (current == target) continue;
                 float days = Experience.Days(c, job);

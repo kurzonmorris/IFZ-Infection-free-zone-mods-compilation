@@ -206,11 +206,49 @@ namespace IFZ.ProductionPlanner
         }
     }
 
+    [HarmonyPatch(typeof(WorksPriorityManager), nameof(WorksPriorityManager.FindWork))]
+    internal static class GuardNoWorkPatch
+    {
+        private static bool Prefix(Character worker, ref bool __result)
+        {
+            if (!Guards.IsGuard(worker)) return true;
+            __result = false;
+            return false;
+        }
+    }
+
+    [HarmonyPatch(typeof(WorkController), nameof(WorkController.GetClosestAvailableWorker))]
+    internal static class GuardNotAvailablePatch
+    {
+        private static readonly FieldInfo AvailableField = AccessTools.Field(typeof(WorkController), "_availableWorkers");
+
+        private static void Postfix(WorkController __instance, Vector3 workPosition, ref Character __result)
+        {
+            if (__result == null || !Guards.IsGuard(__result)) return;
+            Character best = null;
+            float bestDistance = float.MaxValue;
+            if (AvailableField.GetValue(__instance) is HashSet<Character> available)
+            {
+                foreach (var c in available)
+                {
+                    if (c == null || Guards.IsGuard(c)) continue;
+                    float d = (c.Position - workPosition).sqrMagnitude;
+                    if (d < bestDistance)
+                    {
+                        bestDistance = d;
+                        best = c;
+                    }
+                }
+            }
+            __result = best;
+        }
+    }
+
     internal static class Patches
     {
         public static void Apply(Harmony harmony)
         {
-            foreach (var type in new[] { typeof(PriorityGroupsPatch), typeof(SkipLockedCandidatePatch), typeof(PreferUnlockedWorkerPatch), typeof(ExperienceBoostPatch), typeof(HouseOffPatch), typeof(LockedHousePatch), typeof(SkillLevelPatch), typeof(CombatDamagePatch), typeof(CombatRangePatch), typeof(CombatFireRatePatch), typeof(SickDeathPatch), typeof(SickTurnStartPatch), typeof(SickCriticalStartPatch), typeof(GuardedTurnPatch) })
+            foreach (var type in new[] { typeof(PriorityGroupsPatch), typeof(SkipLockedCandidatePatch), typeof(PreferUnlockedWorkerPatch), typeof(ExperienceBoostPatch), typeof(HouseOffPatch), typeof(LockedHousePatch), typeof(SkillLevelPatch), typeof(CombatDamagePatch), typeof(CombatRangePatch), typeof(CombatFireRatePatch), typeof(SickDeathPatch), typeof(SickTurnStartPatch), typeof(SickCriticalStartPatch), typeof(GuardedTurnPatch), typeof(GuardNoWorkPatch), typeof(GuardNotAvailablePatch) })
             {
                 try
                 {

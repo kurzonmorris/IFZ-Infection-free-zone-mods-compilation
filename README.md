@@ -1,6 +1,6 @@
 # IFZ Compilation — Infection Free Zone mods
 
-> **File version:** 1.8.0 · **Last edit:** 2026-10-06 11:35 UTC
+> **File version:** 1.9.0 · **Last edit:** 2026-10-09 08:20 UTC
 
 A set of BepInEx mods for **Infection Free Zone** that are built to work together.
 Each mod is a separate DLL, so you install only what you want.
@@ -46,7 +46,7 @@ See the [install guide](docs/INSTALL.md).
 
 | Mod | Version | Type | Summary |
 |-----|---------|------|---------|
-| [Production Planner](#productionplanner--v071) | 0.7.1 | Function | Daily output goals, 9 work priorities, building and house on/off, named workers locked to jobs and houses, job experience, foremen, squad skill levels, Marksman and house guards. |
+| [Production Planner](#productionplanner--v080) | 0.8.0 | Function | Daily output goals, 9 work priorities, building and house on/off, named workers locked to jobs and houses, job experience, foremen, squad skill levels, Marksman and house guards. |
 | [Mod Menu](#modmenu--v010) | 0.1.0 | Function | A Mods button in the bottom-right corner that lists and opens every mod window. |
 
 <!--
@@ -66,10 +66,10 @@ Short one-line description.
 </details>
 -->
 
-### productionPlanner — v0.7.1
+### productionPlanner — v0.8.0
 
 Set a daily production goal on a building. The mod works out how many workers the building needs and tells you, or sets the max workers for you.
-File: [`IFZ-productionPlanner-v0.7.1.dll`](plugins/IFZ-productionPlanner-v0.7.1.dll) · Hotkey: **F6** · Status: test build.
+File: [`IFZ-productionPlanner-v0.8.0.dll`](plugins/IFZ-productionPlanner-v0.8.0.dll) · Hotkey: **F6** · Status: test build.
 
 <details>
 <summary><b>Planner window</b> — a floating box that follows the building you select</summary>
@@ -164,13 +164,13 @@ File: [`IFZ-productionPlanner-v0.7.1.dll`](plugins/IFZ-productionPlanner-v0.7.1.
 </details>
 
 <details>
-<summary><b>House guards</b> — keep the peace and protect residents</summary>
+<summary><b>House guards</b> — full-time guards who keep the peace and protect residents</summary>
 
-- In the **Residents** window, press **Guard** next to a worker. They are locked into the house as a guard. Up to 1 guard per 25 living spaces (at least 1).
+- In the **Residents** window, press **Guard** next to a worker (unlock them from any job first). They are locked into the house as a guard. Up to 1 guard per 25 living spaces (at least 1).
+- Guards work **full time, like tower guards**: they take no other job and stay at the house. They still eat, sleep and can fall sick.
 - A house with a full guard list: its residents are **50 % less likely to turn** when they die of sickness.
-- Turned infected inside a guarded house are cleared by the guards (1 per guard per game hour). Guards are not hurt.
-- Guards inside the house shoot infected within 35 m (pistol stats, ammo from your stock, Marksman bonuses apply). Guard fighting earns Marksman hours.
-- Guards keep their day job and guard while they are at home.
+- Hostile groups inside a guarded house (for example turned infected) are cleared by the guards (1 per guard per game hour). Guards are not hurt.
+- Guards inside the house shoot **every threat** within 35 m — raiders, infected people and infected animals (anything the game marks hostile to you). Pistol stats, ammo from your stock, Marksman bonuses apply. Guard fighting earns Marksman hours.
 - Settings: `Guards / Enabled`, `KillsPerGuardHour`, `ShootRadius`.
 
 </details>

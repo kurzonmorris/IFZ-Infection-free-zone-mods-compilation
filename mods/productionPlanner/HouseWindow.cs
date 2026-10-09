@@ -179,7 +179,7 @@ namespace IFZ.ProductionPlanner
             var guards = Guards.GuardList(_house);
             int max = Guards.MaxGuards(_house);
             GUILayout.BeginVertical("box");
-            GUILayout.Label($"<b>Guards {guards.Count}/{max}</b> (1 per {Guards.SpacesPerGuard} spaces). Guards live here, clear turned infected inside, and shoot infected nearby (pistol, uses ammo). Full guard list: residents turn 50 % less.");
+            GUILayout.Label($"<b>Guards {guards.Count}/{max}</b> (1 per {Guards.SpacesPerGuard} spaces). Guards work full time like tower guards: they live here, clear turned infected inside, and shoot raiders, infected and infected animals nearby (pistol, uses ammo). Full guard list: residents turn 50 % less.");
             var byId = CitizensById();
             foreach (string id in new List<string>(guards))
             {

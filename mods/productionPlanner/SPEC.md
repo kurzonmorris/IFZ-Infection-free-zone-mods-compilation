@@ -1,6 +1,6 @@
 # productionPlanner — feature spec (workforce expansion)
 
-> **File version:** 1.8.0 · **Last edit:** 2026-10-06 11:30 UTC
+> **File version:** 1.9.0 · **Last edit:** 2026-10-09 08:20 UTC
 >
 > Kurzon's requests of 2026-10-04 and 2026-10-05, with a feasibility check
 > against the decompiled game (`Ifz.dll`, 2026-09-18). Status per feature:
@@ -136,9 +136,10 @@
 
 - A guard is a named resident (worker, not child or soldier), locked into
   the house. Max guards = ceil(capacity / 25), at least 1.
-- **Guards keep their day job.** They guard while they are inside the house
-  (evenings, nights, rest). A full-time guard job needs a new work type in
-  the game's job system (research, like warehouse staff).
+- **Full time (0.8.0, Kurzon 2026-10-09):** guards take no other job.
+  `WorksPriorityManager.FindWork` returns false for a guard (so the game puts
+  them on its free list) and `WorkController.GetClosestAvailableWorker` skips
+  them. Any job they hold is dropped. Job locks and auto-pick skip guards.
 - Turning: the game kills critical sick citizens, then spawns
   round(chance × deaths) fresh infected in a random house, shelter, medbay or
   hospital. The mod weighs each sickness death: 0.5 if the dead person lived
@@ -151,8 +152,10 @@
 - Shooting: each guard inside fires at the nearest infected outside within
   35 m (`Guards / ShootRadius`, capped by weapon reach) with pistol stats and
   Marksman bonuses, using ammo from the stockpile. Shots have no visible
-  tracer. Only infected (the game's `GroupsController`) are targeted; raiders
-  are not yet.
+  tracer. Targets (0.8.0): every group in `GroupsController` (all non-player
+  groups) whose `AffiliationProvider.Get(Fraction.Player) == Hostile` —
+  raiders, infected people and infected animals. Clearing inside the house
+  uses the same test.
 - Guard time in these fights adds Marksman hours.
 
 ## 10. Night shift  🟡
